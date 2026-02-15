@@ -3,7 +3,11 @@
   "WorkspaceRootPath": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{CE306A3C-D25D-7DDB-EB8F-604A987A80C0}|Assembly-CSharp.csproj|c:\\users\\admin\\documents\\github\\unity_vsurv\\vsurvival\\assets\\scripts\\playermovement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CE306A3C-D25D-7DDB-EB8F-604A987A80C0}|Assembly-CSharp.csproj|c:\\users\\admin\\documents\\github\\unity_vsurv\\vsurvival\\assets\\scripts\\camerafollow2d.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE306A3C-D25D-7DDB-EB8F-604A987A80C0}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\camerafollow2d.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE306A3C-D25D-7DDB-EB8F-604A987A80C0}|Assembly-CSharp.csproj|C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\assets\\scripts\\playermovement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CE306A3C-D25D-7DDB-EB8F-604A987A80C0}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\playermovement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -19,6 +23,19 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "CameraFollow2D.cs",
+              "DocumentMoniker": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\Assets\\Scripts\\CameraFollow2D.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\CameraFollow2D.cs",
+              "ToolTip": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\Assets\\Scripts\\CameraFollow2D.cs",
+              "RelativeToolTip": "Assets\\Scripts\\CameraFollow2D.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-15T09:49:42.742Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "PlayerMovement.cs",
               "DocumentMoniker": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\Assets\\Scripts\\PlayerMovement.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\PlayerMovement.cs",
@@ -26,8 +43,7 @@
               "RelativeToolTip": "Assets\\Scripts\\PlayerMovement.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-14T10:20:33.092Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-14T10:20:33.092Z"
             }
           ]
         }
