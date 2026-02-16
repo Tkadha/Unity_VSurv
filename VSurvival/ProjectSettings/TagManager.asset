@@ -11,7 +11,7 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - Enemy
   - 
   - 
   - 
@@ -44,7 +44,7 @@ TagManager:
   - name: BackGround
     uniqueID: 1204959707
     locked: 0
-  - name: Player
+  - name: Actors
     uniqueID: 2744538455
     locked: 0
   m_RenderingLayers:
