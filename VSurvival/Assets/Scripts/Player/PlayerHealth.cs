@@ -16,6 +16,8 @@ public class PlayerHealth : MonoBehaviour
     private Coroutine invincibleCo;
     private SpriteRenderer sr;
     private GameManager gameManager;
+    public int MaxHp => maxHp;
+    public int Current => CurrentHp;
 
     private void Awake()
     {
