@@ -3,7 +3,19 @@
   "WorkspaceRootPath": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{CE306A3C-D25D-7DDB-EB8F-604A987A80C0}|Assembly-CSharp.csproj|c:\\users\\admin\\documents\\github\\unity_vsurv\\vsurvival\\assets\\scripts\\hudcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CE306A3C-D25D-7DDB-EB8F-604A987A80C0}|Assembly-CSharp.csproj|C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\assets\\scripts\\projectile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE306A3C-D25D-7DDB-EB8F-604A987A80C0}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\projectile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE306A3C-D25D-7DDB-EB8F-604A987A80C0}|Assembly-CSharp.csproj|C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\assets\\scripts\\player\\autoshooter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE306A3C-D25D-7DDB-EB8F-604A987A80C0}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\player\\autoshooter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE306A3C-D25D-7DDB-EB8F-604A987A80C0}|Assembly-CSharp.csproj|c:\\users\\admin\\documents\\github\\unity_vsurv\\vsurvival\\assets\\scripts\\projectilepool.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE306A3C-D25D-7DDB-EB8F-604A987A80C0}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\projectilepool.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE306A3C-D25D-7DDB-EB8F-604A987A80C0}|Assembly-CSharp.csproj|C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\assets\\scripts\\hudcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CE306A3C-D25D-7DDB-EB8F-604A987A80C0}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\hudcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -34,11 +46,50 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ProjectilePool.cs",
+              "DocumentMoniker": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\Assets\\Scripts\\ProjectilePool.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\ProjectilePool.cs",
+              "ToolTip": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\Assets\\Scripts\\ProjectilePool.cs",
+              "RelativeToolTip": "Assets\\Scripts\\ProjectilePool.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-19T11:11:36.545Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AutoShooter.cs",
+              "DocumentMoniker": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\Assets\\Scripts\\Player\\AutoShooter.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Player\\AutoShooter.cs",
+              "ToolTip": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\Assets\\Scripts\\Player\\AutoShooter.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Player\\AutoShooter.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAAAAwCcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-19T11:08:39.479Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "Projectile.cs",
+              "DocumentMoniker": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\Assets\\Scripts\\Projectile.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Projectile.cs",
+              "ToolTip": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\Assets\\Scripts\\Projectile.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Projectile.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-19T11:07:22.477Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "HUDController.cs",
               "DocumentMoniker": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\Assets\\Scripts\\HUDController.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\HUDController.cs",
@@ -46,12 +97,11 @@
               "RelativeToolTip": "Assets\\Scripts\\HUDController.cs",
               "ViewState": "AgIAABMAAAAAAAAAAAAAwBsAAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-18T13:20:27.61Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-18T13:20:27.61Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 6,
               "Title": "EnemyContackDamage.cs",
               "DocumentMoniker": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\Assets\\Scripts\\Enemy\\EnemyContackDamage.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Enemy\\EnemyContackDamage.cs",
@@ -63,7 +113,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "PlayerHealth.cs",
               "DocumentMoniker": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\Assets\\Scripts\\Player\\PlayerHealth.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Player\\PlayerHealth.cs",
@@ -75,7 +125,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 8,
               "Title": "GameManager.cs",
               "DocumentMoniker": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\Assets\\Scripts\\GameManager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\GameManager.cs",
@@ -87,7 +137,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
               "Title": "EnemySpawner.cs",
               "DocumentMoniker": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\Assets\\Scripts\\Enemy\\EnemySpawner.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Enemy\\EnemySpawner.cs",
@@ -99,7 +149,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 7,
               "Title": "EnemyVisualRandomizer.cs",
               "DocumentMoniker": "C:\\Users\\admin\\Documents\\GitHub\\Unity_VSurv\\VSurvival\\Assets\\Scripts\\Enemy\\EnemyVisualRandomizer.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Enemy\\EnemyVisualRandomizer.cs",
