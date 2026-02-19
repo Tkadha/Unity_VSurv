@@ -1,6 +1,6 @@
-# =========================
-# Unity generated folders
-# =========================
+############################################################
+# Unity
+############################################################
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -8,62 +8,87 @@
 [Bb]uilds/
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
-[Mm]emoryCaptures/
-[Rr]ecordings/
 
-# Addressables build cache
-[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
-[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.hash*
-[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.json*
+# Asset import cache
+/[Aa]ssets/AssetStoreTools*
 
-# =========================
-# IDE / Editor files
-# =========================
-.vscode/
-.idea/
-*.suo
-*.user
-*.userprefs
-*.csproj
-*.sln
-*.unityproj
-*.booproj
-*.tmp
-*.log
+# Memory captures / recordings (can be huge)
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# Unity auto-generated meta for some builds
 *.pidb
-*.pdb
-*.mdb
+*.booproj
+*.svd
+
+# Unity crash reports
+sysinfo.txt
+
+# Gradle / Android
+.gradle/
+**/build/
+!/[Aa]ssets/**/build/
+
+# Addressables cache (optional; safe to ignore)
+[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+
+# IL2CPP
+Il2cppBuildCache/
+
+############################################################
+# Visual Studio / MSBuild
+############################################################
+.vs/
+*.user
+*.userosscache
+*.suo
+*.cache
+*.dbmdl
 *.opendb
 *.VC.db
 *.VC.VC.opendb
 
-# Rider / JetBrains
-*.DotSettings.user
+# Visual Studio build outputs
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
 
-# =========================
-# OS junk
-# =========================
+# Test results
+[Tt]est[Rr]esult*/
+*.trx
+
+# NuGet
+*.nupkg
+# packages/      # (Unity에서는 보통 사용 안 함. 필요할 때만 주석 해제)
+# **/packages/*
+
+############################################################
+# Rider / JetBrains
+############################################################
+.idea/
+*.sln.iml
+
+############################################################
+# VS Code
+############################################################
+.vscode/
+*.code-workspace
+
+############################################################
+# OS / Misc
+############################################################
 .DS_Store
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+$RECYCLE.BIN/
+*.tmp
+*.log
 
-# =========================
-# Unity crash / diagnostics
-# =========================
-sysinfo.txt
-
-# =========================
-# Packages lock? (선택)
-# =========================
-# 보통은 커밋 권장 (의존성 고정)
-# [Pp]ackages/packages-lock.json
-
-# =========================
-# Build artifacts (선택)
-# =========================
-# 빌드 결과물을 버전관리하고 싶다면 주석 처리
-# *.apk
-# *.aab
-# *.app
-# *.exe
+############################################################
+# Optional (Unity Collaborate / Cloud)
+############################################################
+.collabignore
