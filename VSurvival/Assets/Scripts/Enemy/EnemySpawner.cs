@@ -1,10 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System.Buffers.Text;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
+    [System.Serializable]
+    public class EnemySpawnEntry
+    {
+        public GameObject prefab;
+        [Range(0f, 1f)] public float spawnWeight = 0.33f;
+    }
+
     [Header("Spawn")]
-    [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] private List<EnemySpawnEntry> enemyEntries = new List<EnemySpawnEntry>();
     [SerializeField] private float spawnInterval = 3f;
 
     [Header("Avoid Overlap")]
@@ -14,6 +22,10 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private BoxCollider2D spawnArea;
+
+    [Header("HP Scaling")]
+    [SerializeField] private int baseHp = 3;
+    [SerializeField] private float hpGrowthPerSecond = 0.05f;
 
     private Transform player;
     private float timer;
@@ -49,7 +61,8 @@ public class EnemySpawner : MonoBehaviour
     private void Update()
     {
         if (!spawningEnabled) return;
-        if (enemyPrefab == null || spawnArea == null || player == null) return;
+        if (spawnArea == null || player == null) return;
+        if (enemyEntries == null || enemyEntries.Count == 0) return;
 
         timer += Time.deltaTime;
         if (timer >= spawnInterval)
@@ -74,10 +87,59 @@ public class EnemySpawner : MonoBehaviour
             if (hit != null)
                 continue;
 
-            GameObject enemy = Instantiate(enemyPrefab, pos, Quaternion.identity);
+            GameObject selectedPrefab = GetRandomEnemyPrefab();
+            if (selectedPrefab == null) return;
+
+            GameObject enemy = Instantiate(selectedPrefab, pos, Quaternion.identity);
             spawnedEnemies.Add(enemy);
+
+            InitializeEnemyHp(enemy);
             return;
         }
+    }
+    private GameObject GetRandomEnemyPrefab()
+    {
+        float totalWeight = 0f;
+
+        for (int i = 0; i < enemyEntries.Count; i++)
+        {
+            if (enemyEntries[i].prefab != null)
+                totalWeight += enemyEntries[i].spawnWeight;
+        }
+
+        if (totalWeight <= 0f) return null;
+
+        float randomValue = Random.Range(0f, totalWeight);
+        float current = 0f;
+
+        for (int i = 0; i < enemyEntries.Count; i++)
+        {
+            if (enemyEntries[i].prefab == null) continue;
+
+            current += enemyEntries[i].spawnWeight;
+            if (randomValue <= current)
+            {
+                return enemyEntries[i].prefab;
+            }
+        }
+
+        return enemyEntries[enemyEntries.Count - 1].prefab;
+    }
+
+    private void InitializeEnemyHp(GameObject enemy)
+    {
+        EnemyHealth health = enemy.GetComponent<EnemyHealth>();
+        EnemyStats stats = enemy.GetComponent<EnemyStats>();
+
+        if (health == null || stats == null) return;
+
+        float elapsedTime = Time.timeSinceLevelLoad;
+
+        float timeScaledHp = baseHp + (elapsedTime * hpGrowthPerSecond);
+        float finalHp = timeScaledHp * stats.HpMultiplier;
+
+        int hp = Mathf.Max(1, Mathf.RoundToInt(finalHp));
+        health.InitializeHealth(hp);
     }
 
     private Vector2 GetRandomPointInBounds(Bounds b)

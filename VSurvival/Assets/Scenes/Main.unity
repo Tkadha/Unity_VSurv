@@ -1275,7 +1275,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc6c49404bc37bd4a9704bca0e182d16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
-  enemyPrefab: {fileID: 1380694050183888913, guid: db27df8208bb39e43a79d60ef8037f47, type: 3}
+  enemyEntries:
+  - prefab: {fileID: 2768239704684413859, guid: 176632c10f3900144944e9c620797349, type: 3}
+    spawnWeight: 0.45
+  - prefab: {fileID: 4166592766498795422, guid: bb665148dc5d8b540b03402f05f87f5e, type: 3}
+    spawnWeight: 0.35
+  - prefab: {fileID: 4726316919526456656, guid: 97f889c7cf9eab749adc633e719ad47f, type: 3}
+    spawnWeight: 0.2
   spawnInterval: 3
   minDistanceFromPlayer: 2
   spawnCheckRadius: 0.35
@@ -1283,6 +1289,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   spawnArea: {fileID: 0}
+  baseHp: 3
+  hpGrowthPerSecond: 0.05
 --- !u!61 &1371839024
 BoxCollider2D:
   m_ObjectHideFlags: 0
