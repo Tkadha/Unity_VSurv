@@ -1,11 +1,13 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using TMPro;
 
 public class HUDController : MonoBehaviour
 {
     [Header("Refs")]
     [SerializeField] private PlayerHealth playerHealth;
+    [SerializeField] private ScoreManager scoreManager;
 
     [Header("Score UI")]
     [SerializeField] private TMP_Text scoreText;
@@ -14,26 +16,24 @@ public class HUDController : MonoBehaviour
     [SerializeField] private Slider healthBar;
     [SerializeField] private TMP_Text healthPercentText;
 
-    private int score = 0;
-
     private void Start()
     {
-        // 지금은 점수 0 고정 출력
-        SetScore(0);
+        UpdateScoreUI();
         UpdateHealthUI();
     }
 
     private void Update()
     {
         // 가장 단순/안전: 매 프레임 갱신 (나중에 이벤트 방식으로 바꿔도 됨)
+        UpdateScoreUI();
         UpdateHealthUI();
     }
 
-    public void SetScore(int value)
+    private void UpdateScoreUI()
     {
-        score = value;
-        if (scoreText != null)
-            scoreText.text = $"Score: {score}";
+        if (scoreManager == null || scoreText == null) return;
+
+        scoreText.text = $"Score: {scoreManager.CurrentScore}";
     }
 
     private void UpdateHealthUI()
