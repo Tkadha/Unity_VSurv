@@ -224,6 +224,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 773765eca8860194cb533806b84d6d23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  hitCooldown: 0.2
+  xpOrbPrefab: {fileID: 7510461643359338555, guid: c22e275e65a07824999a5434eddaa852, type: 3}
+  xpDropCount: 2
 --- !u!114 &5757968575381547637
 MonoBehaviour:
   m_ObjectHideFlags: 0

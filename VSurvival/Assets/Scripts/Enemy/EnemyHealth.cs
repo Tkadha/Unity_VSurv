@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class EnemyHealth : MonoBehaviour
 {
     [Header("Hit Cooldown")]
     [SerializeField] private float hitCooldown = 0.2f;
+
+    [Header("XP Drop")]
+    [SerializeField] private GameObject xpOrbPrefab;
+    [SerializeField] private int xpDropCount = 1;
 
     private int maxHp;
     private int currentHp;
@@ -13,8 +16,9 @@ public class EnemyHealth : MonoBehaviour
 
     private ScoreManager scoreManager;
     private EnemyStats enemyStats;
-    public int CurrentHp => currentHp;
+
     public int MaxHp => maxHp;
+    public int CurrentHp => currentHp;
 
     private void Awake()
     {
@@ -42,6 +46,7 @@ public class EnemyHealth : MonoBehaviour
             Die();
         }
     }
+
     private bool CanTakeDamage()
     {
         return Time.time - lastHitTime >= hitCooldown;
@@ -54,7 +59,25 @@ public class EnemyHealth : MonoBehaviour
             scoreManager.AddScore(GetScoreByEnemyType());
         }
 
+        DropXpOrbs();
+
         Destroy(gameObject);
+    }
+
+    private void DropXpOrbs()
+    {
+        if (xpOrbPrefab == null) return;
+
+        for (int i = 0; i < xpDropCount; i++)
+        {
+            Vector3 spawnPos = transform.position;
+
+            // 여러 개 드롭할 때 약간 퍼지게
+            spawnPos.x += Random.Range(-0.2f, 0.2f);
+            spawnPos.y += Random.Range(-0.2f, 0.2f);
+
+            Instantiate(xpOrbPrefab, spawnPos, Quaternion.identity);
+        }
     }
 
     private int GetScoreByEnemyType()
