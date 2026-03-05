@@ -3,8 +3,13 @@ using UnityEngine.SceneManagement;
 
 public class EnemyHealth : MonoBehaviour
 {
+    [Header("Hit Cooldown")]
+    [SerializeField] private float hitCooldown = 0.2f;
+
     private int maxHp;
     private int currentHp;
+
+    private float lastHitTime = -999f;
 
     private ScoreManager scoreManager;
     private EnemyStats enemyStats;
@@ -21,18 +26,25 @@ public class EnemyHealth : MonoBehaviour
     {
         maxHp = hp;
         currentHp = hp;
+        lastHitTime = -999f;
     }
 
     public void TakeDamage(int damage)
     {
         if (currentHp <= 0) return;
+        if (!CanTakeDamage()) return;
 
         currentHp -= damage;
+        lastHitTime = Time.time;
 
         if (currentHp <= 0)
         {
             Die();
         }
+    }
+    private bool CanTakeDamage()
+    {
+        return Time.time - lastHitTime >= hitCooldown;
     }
 
     private void Die()
