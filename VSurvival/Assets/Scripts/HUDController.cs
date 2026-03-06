@@ -20,6 +20,8 @@ public class HUDController : MonoBehaviour
     [Header("XP UI")]
     [SerializeField] private Slider xpBar;
     [SerializeField] private TextMeshProUGUI xpText;
+    [SerializeField] private TextMeshProUGUI levelText;
+    
 
     private void Start()
     {
@@ -66,6 +68,7 @@ public class HUDController : MonoBehaviour
 
         xpBar.maxValue = experienceManager.RequiredXp;
         xpBar.value = experienceManager.CurrentXp;
-        xpText.text = $"EXP: {experienceManager.CurrentXp} / {experienceManager.RequiredXp}";
+        xpText.text = $"EXP:\t{experienceManager.CurrentXp} / {experienceManager.RequiredXp}";
+        levelText.text = $"Lv. {experienceManager.CurrentLevel}";
     }
 }
