@@ -8,6 +8,7 @@ public class HUDController : MonoBehaviour
     [Header("Refs")]
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private ScoreManager scoreManager;
+    [SerializeField] private ExperienceManager experienceManager;
 
     [Header("Score UI")]
     [SerializeField] private TMP_Text scoreText;
@@ -16,10 +17,15 @@ public class HUDController : MonoBehaviour
     [SerializeField] private Slider healthBar;
     [SerializeField] private TMP_Text healthPercentText;
 
+    [Header("XP UI")]
+    [SerializeField] private Slider xpBar;
+    [SerializeField] private TextMeshProUGUI xpText;
+
     private void Start()
     {
         UpdateScoreUI();
         UpdateHealthUI();
+        UpdateXpUI();
     }
 
     private void Update()
@@ -27,6 +33,7 @@ public class HUDController : MonoBehaviour
         // 가장 단순/안전: 매 프레임 갱신 (나중에 이벤트 방식으로 바꿔도 됨)
         UpdateScoreUI();
         UpdateHealthUI();
+        UpdateXpUI();
     }
 
     private void UpdateScoreUI()
@@ -49,6 +56,16 @@ public class HUDController : MonoBehaviour
             healthBar.value = ratio;
 
         if (healthPercentText != null)
-            healthPercentText.text = $"HP : {cur}/{max}";
+            healthPercentText.text = $"HP : {cur} / {max}";
+    }
+
+    private void UpdateXpUI()
+    {
+        if (experienceManager == null)
+            return;
+
+        xpBar.maxValue = experienceManager.RequiredXp;
+        xpBar.value = experienceManager.CurrentXp;
+        xpText.text = $"EXP: {experienceManager.CurrentXp} / {experienceManager.RequiredXp}";
     }
 }

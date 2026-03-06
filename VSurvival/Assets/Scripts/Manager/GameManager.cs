@@ -3,6 +3,8 @@ using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance { get; private set; }
+
     public enum GameState { Waiting, Running }
     public GameState State { get; private set; } = GameState.Waiting;
 
@@ -55,6 +57,9 @@ public class GameManager : MonoBehaviour
 
         // 플레이어 원위치
         playerTransform.position = new Vector3(playerResetPos.x, playerResetPos.y, playerTransform.position.z);
+
+        // 경험치/레벨 초기화
+        ExperienceManager.Instance.ResetXp();
 
         // 대기 상태로 복귀
         EnterWaitingState();

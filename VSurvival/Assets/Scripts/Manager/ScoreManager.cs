@@ -3,6 +3,7 @@
 public class ScoreManager : MonoBehaviour
 {
     public int CurrentScore { get; private set; }
+    public static ScoreManager Instance { get; private set; }
 
     private void Awake()
     {
