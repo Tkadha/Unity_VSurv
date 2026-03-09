@@ -6,9 +6,13 @@ public class AutoShooter : MonoBehaviour
     [SerializeField] private ProjectilePool projectilePool;
     [SerializeField] private Transform muzzle;
 
+    [Header("Refs")]
+    [SerializeField] private PlayerStats playerStats;
+
     [Header("Shoot Settings")]
     [SerializeField] private float fireInterval = 0.5f;
     [SerializeField] private float range = 8f;
+    [SerializeField] private float projectileDamage = 1f;
 
     private float timer;
 
@@ -16,8 +20,15 @@ public class AutoShooter : MonoBehaviour
     {
         if (projectilePool == null) return;
 
+        float finalFireInterval = fireInterval;
+
+        if (playerStats != null && playerStats.AttackRateMultiplier > 0f)
+        {
+            finalFireInterval /= playerStats.AttackRateMultiplier;
+        }
+
         timer += Time.deltaTime;
-        if (timer < fireInterval) return;
+        if (timer < finalFireInterval) return;
         timer = 0f;
 
         Transform target = FindNearestEnemy();
@@ -27,10 +38,17 @@ public class AutoShooter : MonoBehaviour
         Vector2 dir = (target.position - origin);
         if (dir.sqrMagnitude < 0.0001f) return;
 
-        var p = projectilePool.Get(origin, Quaternion.identity);
-        if (p == null) return; // 풀 최대치 도달 시 생략
+        float finalDamage = projectileDamage;
 
-        p.Fire(dir);
+        if (playerStats != null)
+        {
+            finalDamage *= playerStats.AttackDamageMultiplier;
+        }
+
+        var p = projectilePool.Get(origin, Quaternion.identity);
+        if (p == null) return;
+
+        p.Fire(dir, finalDamage);
     }
 
     private Transform FindNearestEnemy()

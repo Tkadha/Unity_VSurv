@@ -4,41 +4,72 @@ using UnityEngine;
 public class PlayerHealth : MonoBehaviour
 {
     [Header("Health")]
-    [SerializeField] private int maxHp = 5;
+    [SerializeField] private int baseMaxHp = 5;
     public int CurrentHp { get; private set; }
 
+    [Header("Refs")]
+    [SerializeField] private PlayerStats playerStats;
+
     [Header("Invincibility")]
-    [SerializeField] private float invincibleDuration = 1.0f; // 무적시간(초)
-    [SerializeField] private float blinkPerSecond = 5.0f;     // 1초당 깜빡임(토글) 횟수
+    [SerializeField] private float invincibleDuration = 1.0f;
+    [SerializeField] private float blinkPerSecond = 5.0f;
     [SerializeField] private bool enableBlink = true;
 
+    private int maxHp;
     private bool isInvincible;
     private Coroutine invincibleCo;
     private SpriteRenderer sr;
     private GameManager gameManager;
+
     public int MaxHp => maxHp;
     public int Current => CurrentHp;
+    public bool IsInvincible => isInvincible;
 
     private void Awake()
     {
         gameManager = FindFirstObjectByType<GameManager>();
         sr = GetComponentInChildren<SpriteRenderer>();
+
+        maxHp = CalculateMaxHp();
         CurrentHp = maxHp;
     }
 
-    public bool IsInvincible => isInvincible;
+    private int CalculateMaxHp()
+    {
+        float multiplier = 1f;
+
+        if (playerStats != null)
+        {
+            multiplier = playerStats.MaxHealthMultiplier;
+        }
+
+        return Mathf.RoundToInt(baseMaxHp * multiplier);
+    }
 
     public void ResetHealth()
     {
+        maxHp = CalculateMaxHp();
         CurrentHp = maxHp;
         StopInvincibility();
     }
+    public void RefreshMaxHealth(bool healToFull = false)
+    {
+        int oldMaxHp = maxHp;
+        maxHp = CalculateMaxHp();
 
+        if (healToFull)
+        {
+            CurrentHp = maxHp;
+        }
+        else
+        {
+            int hpDiff = maxHp - oldMaxHp;
+            CurrentHp = Mathf.Clamp(CurrentHp + hpDiff, 0, maxHp);
+        }
+    }
     public void TakeDamage(int amount)
     {
         if (CurrentHp <= 0) return;
-
-        // 무적이면 데미지 무시
         if (isInvincible) return;
 
         CurrentHp -= amount;
@@ -51,7 +82,6 @@ public class PlayerHealth : MonoBehaviour
             return;
         }
 
-        // 데미지 받으면 무적 시작
         StartInvincibility();
     }
 
@@ -75,7 +105,7 @@ public class PlayerHealth : MonoBehaviour
             invincibleCo = null;
         }
 
-        if (sr != null) sr.enabled = true; // 깜빡임 종료 시 항상 보이게
+        if (sr != null) sr.enabled = true;
     }
 
     private IEnumerator InvincibilityRoutine()

@@ -5,8 +5,8 @@ public class Projectile : MonoBehaviour
 {
     [SerializeField] private float speed = 12f;
     [SerializeField] private float lifeTime = 2.0f;
-    [SerializeField] private int damage = 1;
 
+    private float damage = 1f;
     private Rigidbody2D rb;
     private ProjectilePool pool;
 
@@ -20,9 +20,10 @@ public class Projectile : MonoBehaviour
         pool = p;
     }
 
-    public void Fire(Vector2 dir)
+    public void Fire(Vector2 dir, float damageAmount)
     {
         dir = dir.normalized;
+        damage = damageAmount;
 
         rb.linearVelocity = Vector2.zero;
         rb.angularVelocity = 0f;

@@ -4,7 +4,10 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Move")]
     [SerializeField] private float moveSpeed = 5f;
+    [Header("Refs")]
+    [SerializeField] private PlayerStats playerStats;
 
     private Rigidbody2D rb;
     private InputAction moveAction;
@@ -44,6 +47,13 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        rb.linearVelocity = moveInput * moveSpeed;
+        float finalMoveSpeed = moveSpeed;
+
+        if (playerStats != null)
+        {
+            finalMoveSpeed *= playerStats.MoveSpeedMultiplier;
+        }
+
+        rb.linearVelocity = moveInput * finalMoveSpeed;
     }
 }

@@ -66,9 +66,22 @@ public class HUDController : MonoBehaviour
         if (experienceManager == null)
             return;
 
-        xpBar.maxValue = experienceManager.RequiredXp;
-        xpBar.value = experienceManager.CurrentXp;
-        xpText.text = $"EXP:\t{experienceManager.CurrentXp} / {experienceManager.RequiredXp}";
-        levelText.text = $"Lv. {experienceManager.CurrentLevel}";
+        float currentXp = experienceManager.CurrentXp;
+        float requiredXp = experienceManager.RequiredXp;
+
+        int currentXpDisplay = Mathf.FloorToInt(currentXp);
+        int requiredXpDisplay = Mathf.CeilToInt(requiredXp);
+
+        if (xpBar != null)
+        {
+            xpBar.maxValue = requiredXp;
+            xpBar.value = currentXp;
+        }
+
+        if (xpText != null)
+            xpText.text = $"EXP:\t{currentXpDisplay} / {requiredXpDisplay}";
+
+        if (levelText != null)
+            levelText.text = $"Lv. {experienceManager.CurrentLevel}";
     }
 }

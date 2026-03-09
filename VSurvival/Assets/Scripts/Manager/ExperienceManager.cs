@@ -1,85 +1,165 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class ExperienceManager : MonoBehaviour
 {
     public static ExperienceManager Instance { get; private set; }
 
-    [Header("Level")]
+    [Header("Experience")]
     [SerializeField] private int currentLevel = 1;
-    [SerializeField] private int maxLevel = 99;
+    [SerializeField] private float currentXp = 0f;
+    [SerializeField] private float requiredXp = 10f;
 
-    [Header("XP")]
-    [SerializeField] private int currentXp = 0;
-    [SerializeField] private int requiredXp = 10;
+    [Header("Level Curve")]
+    [SerializeField] private float baseRequiredXp = 5f;
+    [SerializeField] private float requiredXpGrowth = 1.5f;
 
-    [Header("XP Settings")]
-    [SerializeField] private int baseRequiredXp = 10;
-    [SerializeField] private int requiredXpIncreasePerLevel = 5;
+    [Header("Upgrade")]
+    [SerializeField] private LevelUpUI levelUpUI;
+    [SerializeField] private PlayerStats playerStats;
+    [SerializeField] private PlayerHealth playerHealth;
 
-    public int CurrentXp => currentXp;
     public int CurrentLevel => currentLevel;
-    public int RequiredXp => requiredXp;
+    public float CurrentXp => currentXp;
+    public float RequiredXp => requiredXp;
 
     private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-    }
-
-    private void Start()
     {
         requiredXp = CalculateRequiredXp(currentLevel);
     }
 
-    public void AddXp(int amount)
+    private void OnEnable()
     {
-        if (amount <= 0)
-            return;
-
-        if (currentLevel >= maxLevel)
-            return;
-
-        currentXp += amount;
-        ProcessLevelUp();
+        if (levelUpUI != null)
+            levelUpUI.OnUpgradeSelected += HandleUpgradeSelected;
     }
 
-    private void ProcessLevelUp()
+    private void OnDisable()
     {
-        while (currentLevel < maxLevel && currentXp >= requiredXp)
+        if (levelUpUI != null)
+            levelUpUI.OnUpgradeSelected -= HandleUpgradeSelected;
+
+        Time.timeScale = 1f;
+    }
+
+    public void AddXp(float amount)
+    {
+        if (amount <= 0f)
+            return;
+
+        float finalAmount = amount;
+
+        if (playerStats != null)
+            finalAmount *= playerStats.XpGainMultiplier;
+
+        currentXp += finalAmount;
+
+        while (currentXp >= requiredXp)
         {
             currentXp -= requiredXp;
-            currentLevel++;
-            requiredXp = CalculateRequiredXp(currentLevel);
-
-            OnLevelUp();
+            LevelUp();
         }
-
-        if (currentLevel >= maxLevel)
-        {
-            currentLevel = maxLevel;
-            currentXp = 0;
-        }
-    }
-
-    private int CalculateRequiredXp(int level)
-    {
-        return baseRequiredXp + (level - 1) * requiredXpIncreasePerLevel;
-    }
-
-    private void OnLevelUp()
-    {
-        Debug.Log($"Level Up! Current Level : {currentLevel}");
     }
 
     public void ResetXp()
     {
         currentLevel = 1;
-        currentXp = 0;
+        currentXp = 0f;
         requiredXp = CalculateRequiredXp(currentLevel);
+
+        Time.timeScale = 1f;
+
+        if (levelUpUI != null && levelUpUI.IsShowing)
+            levelUpUI.Hide();
+    }
+
+    private void LevelUp()
+    {
+        currentLevel++;
+        requiredXp = CalculateRequiredXp(currentLevel);
+        OnLevelUp();
+    }
+
+    private void OnLevelUp()
+    {
+        UpgradeType[] options = GetRandomUpgradeOptions(3);
+
+        if (levelUpUI != null)
+        {
+            Time.timeScale = 0f;
+            levelUpUI.Show(options);
+        }
+        else
+        {
+            Debug.LogWarning("ExperienceManager: LevelUpUI 참조가 없습니다.");
+        }
+    }
+
+    private float CalculateRequiredXp(int level)
+    {
+        if (level <= 1)
+            return baseRequiredXp;
+
+        return Mathf.Round(baseRequiredXp * Mathf.Pow(requiredXpGrowth, level - 1));
+    }
+
+    private UpgradeType[] GetRandomUpgradeOptions(int count)
+    {
+        UpgradeType[] allTypes = (UpgradeType[])Enum.GetValues(typeof(UpgradeType));
+        List<UpgradeType> pool = new List<UpgradeType>(allTypes);
+
+        int resultCount = Mathf.Min(count, pool.Count);
+        UpgradeType[] result = new UpgradeType[resultCount];
+
+        for (int i = 0; i < resultCount; i++)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, pool.Count);
+            result[i] = pool[randomIndex];
+            pool.RemoveAt(randomIndex);
+        }
+
+        return result;
+    }
+
+    private void HandleUpgradeSelected(UpgradeType upgradeType)
+    {
+        ApplyUpgrade(upgradeType);
+        Time.timeScale = 1f;
+    }
+
+    private void ApplyUpgrade(UpgradeType upgradeType)
+    {
+        if (playerStats == null)
+        {
+            Debug.LogWarning("ExperienceManager: PlayerStats 참조가 없습니다.");
+            return;
+        }
+
+        switch (upgradeType)
+        {
+            case UpgradeType.MoveSpeed:
+                playerStats.IncreaseMoveSpeed(0.10f);
+                break;
+
+            case UpgradeType.AttackDamage:
+                playerStats.IncreaseAttackDamage(0.20f);
+                break;
+
+            case UpgradeType.AttackRate:
+                playerStats.IncreaseAttackRate(0.15f);
+                break;
+
+            case UpgradeType.MaxHealth:
+                playerStats.IncreaseMaxHealth(0.20f);
+
+                if (playerHealth != null)
+                    playerHealth.RefreshMaxHealth(false);
+                break;
+
+            case UpgradeType.XpGain:
+                playerStats.IncreaseXpGain(0.15f);
+                break;
+        }
     }
 }

@@ -12,6 +12,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private EnemySpawner enemySpawner;
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private Transform playerTransform;
+    [SerializeField] private PlayerStats playerStats;
+    [SerializeField] private ExperienceManager experienceManager;
 
     [Header("Reset")]
     [SerializeField] private Vector2 playerResetPos = Vector2.zero;
@@ -58,11 +60,20 @@ public class GameManager : MonoBehaviour
         // 플레이어 원위치
         playerTransform.position = new Vector3(playerResetPos.x, playerResetPos.y, playerTransform.position.z);
 
-        // 경험치/레벨 초기화
-        ExperienceManager.Instance.ResetXp();
-
+        ResetRunState();
         // 대기 상태로 복귀
         EnterWaitingState();
+    }
+    private void ResetRunState()
+    {
+        if (playerStats != null)
+            playerStats.ResetStats();
+
+        if (experienceManager != null)
+            experienceManager.ResetXp();
+
+        if (playerHealth != null)
+            playerHealth.ResetHealth();
     }
 
     private void EnterWaitingState()

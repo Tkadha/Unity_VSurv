@@ -33,12 +33,12 @@ public class EnemyHealth : MonoBehaviour
         lastHitTime = -999f;
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(float damage)
     {
         if (currentHp <= 0) return;
         if (!CanTakeDamage()) return;
 
-        currentHp -= damage;
+        currentHp -= Mathf.RoundToInt(damage);
         lastHitTime = Time.time;
 
         if (currentHp <= 0)
