@@ -27,6 +27,12 @@ public class LevelUpUI : MonoBehaviour
 
     public event Action<UpgradeType> OnUpgradeSelected;
 
+    private const int MOVE_SPEED_PERCENT = 20;
+    private const int ATTACK_DAMAGE_PERCENT = 20;
+    private const int ATTACK_RATE_PERCENT = 20;
+    private const int MAX_HEALTH_PERCENT = 20;
+    private const int XP_GAIN_PERCENT = 20;
+
     private void Awake()
     {
         HideImmediate();
@@ -102,19 +108,19 @@ public class LevelUpUI : MonoBehaviour
         switch (upgradeType)
         {
             case UpgradeType.MoveSpeed:
-                return "이동 속도 증가";
+                return $"이동 속도 증가";
 
             case UpgradeType.AttackDamage:
-                return "공격력 증가";
+                return $"공격력 증가";
 
             case UpgradeType.AttackRate:
-                return "공격 속도 증가";
+                return $"공격 속도 증가";
 
             case UpgradeType.MaxHealth:
-                return "최대 체력 증가";
+                return $"최대 체력 증가";
 
             case UpgradeType.XpGain:
-                return "경험치 획득량 증가";
+                return $"경험치 획득량 증가";
 
             default:
                 return "알 수 없음";
@@ -126,19 +132,19 @@ public class LevelUpUI : MonoBehaviour
         switch (upgradeType)
         {
             case UpgradeType.MoveSpeed:
-                return "플레이어 이동 속도 배수를 증가시킵니다.";
+                return $"플레이어 이동 속도 배수를 {MOVE_SPEED_PERCENT}% 증가시킵니다.";
 
             case UpgradeType.AttackDamage:
-                return "투사체 최종 데미지 배수를 증가시킵니다.";
+                return $"투사체 최종 데미지 배수를 {ATTACK_DAMAGE_PERCENT}% 증가시킵니다.";
 
             case UpgradeType.AttackRate:
-                return "자동 발사 주기를 더 빠르게 만듭니다.";
+                return $"자동 발사 속도를 {ATTACK_RATE_PERCENT}% 향상시킵니다.";
 
             case UpgradeType.MaxHealth:
-                return "최대 체력 배수를 증가시킵니다.";
+                return $"최대 체력 배수를 {MAX_HEALTH_PERCENT}% 증가시킵니다.";
 
             case UpgradeType.XpGain:
-                return "경험치 획득량 배수를 증가시킵니다.";
+                return $"경험치 획득량 배수를 {XP_GAIN_PERCENT}% 증가시킵니다.";
 
             default:
                 return string.Empty;
