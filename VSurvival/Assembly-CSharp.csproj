@@ -68,6 +68,7 @@
     <Compile Include="Assets\Scripts\Manager\GameManager.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyVisualRandomizer.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyContackDamage.cs" />
+    <Compile Include="Assets\Scripts\UI\UpgradeFeedbackUI.cs" />
     <Compile Include="Assets\Scripts\Manager\ScoreManager.cs" />
     <Compile Include="Assets\Scripts\Manager\ExperienceManager.cs" />
     <Compile Include="Assets\Scripts\HUDController.cs" />

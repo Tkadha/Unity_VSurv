@@ -17,9 +17,9 @@ public class ExperienceManager : MonoBehaviour
 
     [Header("Upgrade")]
     [SerializeField] private LevelUpUI levelUpUI;
+    [SerializeField] private UpgradeFeedbackUI upgradeFeedbackUI;
     [SerializeField] private PlayerStats playerStats;
     [SerializeField] private PlayerHealth playerHealth;
-
     public int CurrentLevel => currentLevel;
     public float CurrentXp => currentXp;
     public float RequiredXp => requiredXp;
@@ -125,9 +125,39 @@ public class ExperienceManager : MonoBehaviour
     private void HandleUpgradeSelected(UpgradeType upgradeType)
     {
         ApplyUpgrade(upgradeType);
+        ShowUpgradeFeedback(upgradeType);
         Time.timeScale = 1f;
     }
+    private void ShowUpgradeFeedback(UpgradeType upgradeType)
+    {
+        if (upgradeFeedbackUI == null)
+            return;
 
+        upgradeFeedbackUI.ShowMessage(GetUpgradeFeedbackMessage(upgradeType));
+    }
+    private string GetUpgradeFeedbackMessage(UpgradeType upgradeType)
+    {
+        switch (upgradeType)
+        {
+            case UpgradeType.MoveSpeed:
+                return "이동 속도 증가 (+20%) 적용";
+
+            case UpgradeType.AttackDamage:
+                return "공격력 증가 (+20%) 적용";
+
+            case UpgradeType.AttackRate:
+                return "공격 속도 증가 (+20%) 적용";
+
+            case UpgradeType.MaxHealth:
+                return "최대 체력 증가 (+20%) 적용";
+
+            case UpgradeType.XpGain:
+                return "경험치 획득량 증가 (+20%) 적용";
+
+            default:
+                return "업그레이드 적용";
+        }
+    }
     private void ApplyUpgrade(UpgradeType upgradeType)
     {
         if (playerStats == null)
