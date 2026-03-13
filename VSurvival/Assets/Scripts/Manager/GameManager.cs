@@ -1,12 +1,16 @@
 ﻿using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    public enum GameState { Waiting, Running }
-    public GameState State { get; private set; } = GameState.Waiting;
+    public enum GameState
+    {
+        Lobby,
+        Playing
+    }
+
+    public GameState State { get; private set; } = GameState.Lobby;
 
     [Header("References")]
     [SerializeField] private EnemySpawner enemySpawner;
@@ -15,55 +19,87 @@ public class GameManager : MonoBehaviour
     [SerializeField] private PlayerStats playerStats;
     [SerializeField] private ExperienceManager experienceManager;
 
+    [Header("UI References")]
+    [SerializeField] private LobbyUI lobbyUI;
+    [SerializeField] private GameObject hudRoot;
+    [SerializeField] private LevelUpUI levelUpUI;
+    [SerializeField] private UpgradeFeedbackUI upgradeFeedbackUI;
+
     [Header("Reset")]
     [SerializeField] private Vector2 playerResetPos = Vector2.zero;
 
-    private void Start()
+    private void Awake()
     {
-        // 시작 시 대기 상태 세팅
-        EnterWaitingState();
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
     }
 
-    private void Update()
+    private void Start()
     {
-        // "어떤 키든 입력" 감지 (New Input System)
-        bool anyKeyPressed = Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame;
-
-        if (State == GameState.Waiting && anyKeyPressed)
-        {
-            StartGame();
-        }
+        EnterLobbyState();
     }
 
     public void StartGame()
     {
-        State = GameState.Running;
+        if (State == GameState.Playing)
+            return;
 
-        // 플레이어 상태 초기화(체력, 무적 등)
-        playerHealth.ResetHealth();
+        ResetRunState();
+        ResetGameplayUI();
 
-        // 스포너 시작
-        enemySpawner.SetSpawning(true);
+        if (playerTransform != null)
+        {
+            playerTransform.position = new Vector3(
+                playerResetPos.x,
+                playerResetPos.y,
+                playerTransform.position.z
+            );
+        }
+
+        if (enemySpawner != null)
+        {
+            enemySpawner.ClearAllEnemies();
+            enemySpawner.SetSpawning(true);
+        }
+
+        State = GameState.Playing;
+        ApplyUIByState();
     }
 
     public void GameOver()
     {
-        // Running 중에만 처리
-        if (State != GameState.Running) return;
+        if (State != GameState.Playing)
+            return;
 
-        // 스폰 중지
-        enemySpawner.SetSpawning(false);
-
-        // 적 전부 제거
-        enemySpawner.ClearAllEnemies();
-
-        // 플레이어 원위치
-        playerTransform.position = new Vector3(playerResetPos.x, playerResetPos.y, playerTransform.position.z);
-
+        if (enemySpawner != null)
+        {
+            enemySpawner.SetSpawning(false);
+            enemySpawner.ClearAllEnemies();
+        }
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.ResetScore();
+        }
         ResetRunState();
-        // 대기 상태로 복귀
-        EnterWaitingState();
+        ResetGameplayUI();
+
+        if (playerTransform != null)
+        {
+            playerTransform.position = new Vector3(
+                playerResetPos.x,
+                playerResetPos.y,
+                playerTransform.position.z
+            );
+        }
+
+        EnterLobbyState();
     }
+
     private void ResetRunState()
     {
         if (playerStats != null)
@@ -74,13 +110,59 @@ public class GameManager : MonoBehaviour
 
         if (playerHealth != null)
             playerHealth.ResetHealth();
+
+        if (ScoreManager.Instance != null)
+            ScoreManager.Instance.ResetScore();
+    }
+    private void ResetGameplayUI()
+    {
+        if (levelUpUI != null)
+            levelUpUI.Hide();
+
+        if (upgradeFeedbackUI != null)
+            upgradeFeedbackUI.HideImmediate();
+
+        Time.timeScale = 1f;
     }
 
-    private void EnterWaitingState()
+    private void EnterLobbyState()
     {
-        State = GameState.Waiting;
+        State = GameState.Lobby;
 
-        // 대기 중에는 스폰 꺼두기
-        enemySpawner.SetSpawning(false);
+        if (enemySpawner != null)
+            enemySpawner.SetSpawning(false);
+
+        ApplyUIByState();
+    }
+
+    private void ApplyUIByState()
+    {
+        bool isLobby = State == GameState.Lobby;
+        bool isPlaying = State == GameState.Playing;
+
+        if (lobbyUI != null)
+        {
+            if (isLobby) lobbyUI.Show();
+            else lobbyUI.Hide();
+        }
+
+        if (hudRoot != null)
+            hudRoot.SetActive(isPlaying);
+
+        if (levelUpUI != null)
+            levelUpUI.Hide();
+
+        if (upgradeFeedbackUI != null)
+            upgradeFeedbackUI.HideImmediate();
+    }
+
+    public bool IsLobbyState()
+    {
+        return State == GameState.Lobby;
+    }
+
+    public bool IsPlayingState()
+    {
+        return State == GameState.Playing;
     }
 }
