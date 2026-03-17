@@ -1287,6 +1287,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1484590840}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &591395121
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 591395122}
+  - component: {fileID: 591395123}
+  m_Layer: 0
+  m_Name: NetworkManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &591395122
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 591395121}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2123693214}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &591395123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 591395121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c3d4b09cbb531b45a6ea8f7183c6dd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameServerClient
+  serverIp: 127.0.0.1
+  serverPort: 7777
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -3503,6 +3549,8 @@ MonoBehaviour:
   levelUpUI: {fileID: 1916341983}
   upgradeFeedbackUI: {fileID: 643109327}
   playerResetPos: {x: 0, y: 0}
+  gameServerClient: {fileID: 591395123}
+  playerName: Player
 --- !u!4 &1538024958
 Transform:
   m_ObjectHideFlags: 0
@@ -4597,6 +4645,7 @@ Transform:
   - {fileID: 1957536463}
   - {fileID: 1295384494}
   - {fileID: 1538024958}
+  - {fileID: 591395122}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2127362771

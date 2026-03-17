@@ -25,6 +25,6 @@ public class LobbyUI : MonoBehaviour
             return;
         }
 
-        GameManager.Instance.StartGame();
+        GameManager.Instance.RequestStartGame();
     }
 }

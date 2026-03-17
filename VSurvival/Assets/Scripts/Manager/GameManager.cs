@@ -28,6 +28,9 @@ public class GameManager : MonoBehaviour
     [Header("Reset")]
     [SerializeField] private Vector2 playerResetPos = Vector2.zero;
 
+    [Header("Network")]
+    [SerializeField] private GameServerClient gameServerClient;
+    [SerializeField] private string playerName = "Player";
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -42,6 +45,28 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         EnterLobbyState();
+    }
+    public async void RequestStartGame()
+    {
+        if (gameServerClient == null)
+        {
+            Debug.LogError("[GameManager] GameServerClient 참조가 없습니다.");
+            return;
+        }
+
+        Debug.Log("[GameManager] 서버에 게임 시작 요청 전송");
+
+        StartGameResponse response = await gameServerClient.RequestStartGameAsync(playerName);
+
+        if (response.Success)
+        {
+            Debug.Log("[GameManager] 서버 승인 성공, 게임 시작");
+            StartGame();
+        }
+        else
+        {
+            Debug.LogWarning($"[GameManager] 서버 승인 실패: {response.Message}");
+        }
     }
 
     public void StartGame()
