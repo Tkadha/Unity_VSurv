@@ -1,9 +1,10 @@
-﻿using System.Net;
+﻿using System.Collections.Concurrent;
+using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Text.Json;
 using VSurvServer.Core.Game;
 using VSurvServer.Core.Services;
+using VSurvServer.Core.Sessions;
 using VSurvServer.Infrastructure.Logging;
 using VSurvServer.Protocol.Packets;
 
@@ -13,8 +14,14 @@ public class ServerHost
 {
     private TcpListener? _listener;
     private bool _isRunning;
+
     private readonly StartGameService _startGameService = new();
     private ServerGameState _currentState = ServerGameState.Lobby;
+
+    private readonly ConcurrentDictionary<int, ClientSession> _sessions = new();
+    private int _nextSessionId = 0;
+
+    private readonly object _stateLock = new();
 
     public void Start()
     {
@@ -30,7 +37,7 @@ public class ServerHost
         ServerLogger.Info("서버 초기화 완료");
         ServerLogger.Info("TCP 리스너 시작 - Port: 7777");
 
-        Task.Run(AcceptLoop);
+        Task.Run(AcceptLoopAsync);
     }
 
     public void Stop()
@@ -43,10 +50,17 @@ public class ServerHost
         _isRunning = false;
         _listener?.Stop();
 
+        foreach (var sessionPair in _sessions)
+        {
+            sessionPair.Value.Disconnect();
+        }
+
+        _sessions.Clear();
+
         ServerLogger.Info("서버 종료 처리");
     }
 
-    private async Task AcceptLoop()
+    private async Task AcceptLoopAsync()
     {
         if (_listener == null)
         {
@@ -57,76 +71,89 @@ public class ServerHost
         {
             try
             {
-                var client = await _listener.AcceptTcpClientAsync();
-                ServerLogger.Info("클라이언트 접속 수락");
+                TcpClient tcpClient = await _listener.AcceptTcpClientAsync();
 
-                _ = Task.Run(() => HandleClientAsync(client));
+                int sessionId = Interlocked.Increment(ref _nextSessionId);
+                ClientSession session = new ClientSession(sessionId, tcpClient);
+
+                if (_sessions.TryAdd(sessionId, session))
+                {
+                    ServerLogger.Info($"클라이언트 접속 수락 - SessionId: {sessionId}, ConnectedSessions: {_sessions.Count}");
+
+                    _ = Task.Run(() => session.RunAsync(
+                        OnSessionMessageReceivedAsync,
+                        OnSessionDisconnectedAsync));
+                }
+                else
+                {
+                    ServerLogger.Error($"세션 등록 실패 - SessionId: {sessionId}");
+                    session.Disconnect();
+                }
             }
             catch (Exception ex)
             {
                 if (_isRunning)
                 {
-                    ServerLogger.Error($"AcceptLoop 예외 발생: {ex.Message}");
+                    ServerLogger.Error($"AcceptLoopAsync 예외 발생: {ex.Message}");
                 }
             }
         }
     }
 
-    private async Task HandleClientAsync(TcpClient client)
+    private async Task OnSessionMessageReceivedAsync(ClientSession session, string requestJson)
     {
-        using (client)
+        try
         {
-            try
+            ServerLogger.Info($"수신 데이터 - SessionId: {session.SessionId}, Payload: {requestJson}");
+
+            StartGameRequest? request = JsonSerializer.Deserialize<StartGameRequest>(requestJson);
+
+            StartGameResponse response;
+            if (request == null)
             {
-                using NetworkStream stream = client.GetStream();
-
-                byte[] buffer = new byte[4096];
-                int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-
-                if (bytesRead <= 0)
+                response = new StartGameResponse
                 {
-                    ServerLogger.Error("수신 데이터 없음");
-                    return;
-                }
-
-                string requestJson = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                ServerLogger.Info($"수신 데이터: {requestJson}");
-
-                StartGameRequest? request = JsonSerializer.Deserialize<StartGameRequest>(requestJson);
-                if (request == null)
+                    Success = false,
+                    Message = "잘못된 요청입니다."
+                };
+            }
+            else
+            {
+                lock (_stateLock)
                 {
-                    var invalidResponse = new StartGameResponse
+                    response = _startGameService.Handle(request, _currentState);
+
+                    if (response.Success)
                     {
-                        Success = false,
-                        Message = "잘못된 요청입니다."
-                    };
-
-                    await SendResponseAsync(stream, invalidResponse);
-                    return;
+                        _currentState = ServerGameState.Playing;
+                    }
                 }
-
-                StartGameResponse response = _startGameService.Handle(request, _currentState);
-
-                if (response.Success)
-                {
-                    _currentState = ServerGameState.Playing;
-                }
-
-                await SendResponseAsync(stream, response);
             }
-            catch (Exception ex)
-            {
-                ServerLogger.Error($"HandleClientAsync 예외 발생: {ex.Message}");
-            }
+
+            string responseJson = JsonSerializer.Serialize(response);
+            await session.SendAsync(responseJson);
+
+            ServerLogger.Info($"응답 데이터 전송 - SessionId: {session.SessionId}, Payload: {responseJson}");
+        }
+        catch (Exception ex)
+        {
+            ServerLogger.Error($"OnSessionMessageReceivedAsync 예외 발생 - SessionId: {session.SessionId}, Message: {ex.Message}");
+            session.Disconnect();
         }
     }
 
-    private async Task SendResponseAsync(NetworkStream stream, StartGameResponse response)
+    private Task OnSessionDisconnectedAsync(ClientSession session)
     {
-        string responseJson = JsonSerializer.Serialize(response);
-        byte[] responseBytes = Encoding.UTF8.GetBytes(responseJson);
+        RemoveSession(session.SessionId);
+        return Task.CompletedTask;
+    }
 
-        await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
-        ServerLogger.Info($"응답 데이터 전송: {responseJson}");
+    private void RemoveSession(int sessionId)
+    {
+        if (_sessions.TryRemove(sessionId, out ClientSession? session))
+        {
+            session.Disconnect();
+            ServerLogger.Info($"세션 종료 - SessionId: {sessionId}, ConnectedSessions: {_sessions.Count}");
+        }
     }
 }
