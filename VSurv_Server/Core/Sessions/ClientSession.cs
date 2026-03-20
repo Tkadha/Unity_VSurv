@@ -1,10 +1,13 @@
 ﻿using System.Net.Sockets;
 using System.Text;
+using VSurvServer.Protocol.Packets;
 
 namespace VSurvServer.Core.Sessions;
 
 public class ClientSession
 {
+    private const int HeaderSize = 3;
+
     private readonly TcpClient _tcpClient;
     private readonly NetworkStream _stream;
     private bool _isDisconnected;
@@ -20,7 +23,7 @@ public class ClientSession
     }
 
     public async Task RunAsync(
-        Func<ClientSession, string, Task> onMessageReceived,
+        Func<ClientSession, PacketId, string, Task> onPacketReceived,
         Func<ClientSession, Task>? onDisconnected = null,
         CancellationToken cancellationToken = default)
     {
@@ -28,14 +31,14 @@ public class ClientSession
         {
             while (!cancellationToken.IsCancellationRequested && IsConnected)
             {
-                string? message = await ReceiveOnceAsync(cancellationToken);
+                PacketReadResult? result = await ReceivePacketAsync(cancellationToken);
 
-                if (string.IsNullOrWhiteSpace(message))
+                if (result == null)
                 {
                     break;
                 }
 
-                await onMessageReceived(this, message);
+                await onPacketReceived(this, result.PacketId, result.PayloadJson);
             }
         }
         catch (OperationCanceledException)
@@ -56,33 +59,81 @@ public class ClientSession
         }
     }
 
-    public async Task<string?> ReceiveOnceAsync(CancellationToken cancellationToken = default)
+    public async Task<PacketReadResult?> ReceivePacketAsync(CancellationToken cancellationToken = default)
     {
         if (!IsConnected)
         {
             return null;
         }
 
-        byte[] buffer = new byte[4096];
-
-        int bytesRead = await _stream.ReadAsync(buffer, cancellationToken);
-        if (bytesRead <= 0)
+        byte[] headerBuffer = await ReadExactAsync(HeaderSize, cancellationToken);
+        if (headerBuffer.Length == 0)
         {
             return null;
         }
 
-        return Encoding.UTF8.GetString(buffer, 0, bytesRead);
+        ushort totalSize = BitConverter.ToUInt16(headerBuffer, 0);
+        byte packetIdValue = headerBuffer[2];
+
+        if (totalSize < HeaderSize)
+        {
+            return null;
+        }
+
+        int payloadSize = totalSize - HeaderSize;
+        byte[] payloadBuffer = payloadSize > 0
+            ? await ReadExactAsync(payloadSize, cancellationToken)
+            : Array.Empty<byte>();
+
+        if (payloadSize > 0 && payloadBuffer.Length == 0)
+        {
+            return null;
+        }
+
+        string payloadJson = Encoding.UTF8.GetString(payloadBuffer);
+
+        return new PacketReadResult((PacketId)packetIdValue, payloadJson);
     }
 
-    public async Task SendAsync(string message, CancellationToken cancellationToken = default)
+    public async Task SendPacketAsync(PacketId packetId, string payloadJson, CancellationToken cancellationToken = default)
     {
         if (!IsConnected)
         {
             return;
         }
 
-        byte[] data = Encoding.UTF8.GetBytes(message);
-        await _stream.WriteAsync(data, cancellationToken);
+        byte[] payloadBuffer = Encoding.UTF8.GetBytes(payloadJson);
+        ushort totalSize = checked((ushort)(HeaderSize + payloadBuffer.Length));
+
+        byte[] packetBuffer = new byte[totalSize];
+
+        Array.Copy(BitConverter.GetBytes(totalSize), 0, packetBuffer, 0, 2);
+        packetBuffer[2] = (byte)packetId;
+        Array.Copy(payloadBuffer, 0, packetBuffer, HeaderSize, payloadBuffer.Length);
+
+        await _stream.WriteAsync(packetBuffer, cancellationToken);
+    }
+
+    private async Task<byte[]> ReadExactAsync(int length, CancellationToken cancellationToken = default)
+    {
+        byte[] buffer = new byte[length];
+        int totalRead = 0;
+
+        while (totalRead < length)
+        {
+            int bytesRead = await _stream.ReadAsync(
+                buffer.AsMemory(totalRead, length - totalRead),
+                cancellationToken);
+
+            if (bytesRead <= 0)
+            {
+                return Array.Empty<byte>();
+            }
+
+            totalRead += bytesRead;
+        }
+
+        return buffer;
     }
 
     public void Disconnect()
@@ -109,5 +160,17 @@ public class ClientSession
         catch
         {
         }
+    }
+}
+
+public sealed class PacketReadResult
+{
+    public PacketId PacketId { get; }
+    public string PayloadJson { get; }
+
+    public PacketReadResult(PacketId packetId, string payloadJson)
+    {
+        PacketId = packetId;
+        PayloadJson = payloadJson;
     }
 }

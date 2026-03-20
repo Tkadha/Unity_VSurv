@@ -81,8 +81,8 @@ public class ServerHost
                     ServerLogger.Info($"클라이언트 접속 수락 - SessionId: {sessionId}, ConnectedSessions: {_sessions.Count}");
 
                     _ = Task.Run(() => session.RunAsync(
-                        OnSessionMessageReceivedAsync,
-                        OnSessionDisconnectedAsync));
+                                        OnSessionPacketReceivedAsync,
+                                        OnSessionDisconnectedAsync));
                 }
                 else
                 {
@@ -100,44 +100,57 @@ public class ServerHost
         }
     }
 
-    private async Task OnSessionMessageReceivedAsync(ClientSession session, string requestJson)
+    private async Task OnSessionPacketReceivedAsync(ClientSession session, PacketId packetId, string payloadJson)
     {
         try
         {
-            ServerLogger.Info($"수신 데이터 - SessionId: {session.SessionId}, Payload: {requestJson}");
+            ServerLogger.Info($"수신 데이터 - SessionId: {session.SessionId}, PacketId: {packetId}, Payload: {payloadJson}");
 
-            StartGameRequest? request = JsonSerializer.Deserialize<StartGameRequest>(requestJson);
-
-            StartGameResponse response;
-            if (request == null)
+            switch (packetId)
             {
-                response = new StartGameResponse
-                {
-                    Success = false,
-                    Message = "잘못된 요청입니다."
-                };
-            }
-            else
-            {
-                lock (_stateLock)
-                {
-                    response = _startGameService.Handle(request, _currentState);
-
-                    if (response.Success)
+                case PacketId.StartGameRequest:
                     {
-                        _currentState = ServerGameState.Playing;
+                        StartGameRequest? request = JsonSerializer.Deserialize<StartGameRequest>(payloadJson);
+
+                        StartGameResponse response;
+                        if (request == null)
+                        {
+                            response = new StartGameResponse
+                            {
+                                Success = false,
+                                Message = "잘못된 요청입니다."
+                            };
+                        }
+                        else
+                        {
+                            lock (_stateLock)
+                            {
+                                response = _startGameService.Handle(request, _currentState);
+
+                                if (response.Success)
+                                {
+                                    _currentState = ServerGameState.Playing;
+                                }
+                            }
+                        }
+
+                        string responseJson = JsonSerializer.Serialize(response);
+                        await session.SendPacketAsync(PacketId.StartGameResponse, responseJson);
+
+                        ServerLogger.Info($"응답 데이터 전송 - SessionId: {session.SessionId}, PacketId: {PacketId.StartGameResponse}, Payload: {responseJson}");
+                        break;
                     }
-                }
+
+                default:
+                    {
+                        ServerLogger.Error($"알 수 없는 PacketId 수신 - SessionId: {session.SessionId}, PacketId: {packetId}");
+                        break;
+                    }
             }
-
-            string responseJson = JsonSerializer.Serialize(response);
-            await session.SendAsync(responseJson);
-
-            ServerLogger.Info($"응답 데이터 전송 - SessionId: {session.SessionId}, Payload: {responseJson}");
         }
         catch (Exception ex)
         {
-            ServerLogger.Error($"OnSessionMessageReceivedAsync 예외 발생 - SessionId: {session.SessionId}, Message: {ex.Message}");
+            ServerLogger.Error($"OnSessionPacketReceivedAsync 예외 발생 - SessionId: {session.SessionId}, Message: {ex.Message}");
             session.Disconnect();
         }
     }
