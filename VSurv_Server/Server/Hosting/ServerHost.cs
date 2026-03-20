@@ -141,6 +141,38 @@ public class ServerHost
                         break;
                     }
 
+                case PacketId.PingRequest:
+                    {
+                        PingRequest? request = JsonSerializer.Deserialize<PingRequest>(payloadJson);
+
+                        PingResponse response;
+                        if (request == null)
+                        {
+                            response = new PingResponse
+                            {
+                                Success = false,
+                                Message = "잘못된 Ping 요청입니다.",
+                                ClientTimeTicks = 0,
+                                ServerTimeTicks = DateTime.UtcNow.Ticks
+                            };
+                        }
+                        else
+                        {
+                            response = new PingResponse
+                            {
+                                Success = true,
+                                Message = "Pong",
+                                ClientTimeTicks = request.ClientTimeTicks,
+                                ServerTimeTicks = DateTime.UtcNow.Ticks
+                            };
+                        }
+
+                        string responseJson = JsonSerializer.Serialize(response);
+                        await session.SendPacketAsync(PacketId.PingResponse, responseJson);
+
+                        ServerLogger.Info($"응답 데이터 전송 - SessionId: {session.SessionId}, PacketId: {PacketId.PingResponse}, Payload: {responseJson}");
+                        break;
+                    }
                 default:
                     {
                         ServerLogger.Error($"알 수 없는 PacketId 수신 - SessionId: {session.SessionId}, PacketId: {packetId}");

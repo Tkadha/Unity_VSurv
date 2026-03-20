@@ -1,5 +1,4 @@
-﻿namespace VSurvServer.Protocol.Packets;
-
+﻿
 public enum PacketId : byte
 {
     None = 0,

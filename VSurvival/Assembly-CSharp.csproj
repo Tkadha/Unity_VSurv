@@ -67,6 +67,7 @@
     <Compile Include="Assets\Scripts\Projectile\Projectile.cs" />
     <Compile Include="Assets\Scripts\Manager\GameManager.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyVisualRandomizer.cs" />
+    <Compile Include="Assets\Scripts\Network\Packet\GamePacket.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyContackDamage.cs" />
     <Compile Include="Assets\Scripts\UI\UpgradeFeedbackUI.cs" />
     <Compile Include="Assets\Scripts\Manager\ScoreManager.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="Assets\Scripts\UI\LevelUpUI.cs" />
     <Compile Include="Assets\Scripts\Network\GameServerClient.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyStats.cs" />
+    <Compile Include="Assets\Scripts\Network\PacketId.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerStats.cs" />
     <Compile Include="Assets\Scripts\Projectile\ProjectilePool.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerHealth.cs" />
