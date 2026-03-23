@@ -96,33 +96,44 @@ public class GameManager : MonoBehaviour
         ApplyUIByState();
     }
 
-    public void GameOver()
+    public async void GameOver()
     {
-        if (State != GameState.Playing)
-            return;
+        if (State != GameState.Playing) return;
 
         if (enemySpawner != null)
         {
             enemySpawner.SetSpawning(false);
             enemySpawner.ClearAllEnemies();
         }
+        Debug.Log("[GameManager] 서버에 게임 종료 보고 및 초기화 대기 중...");
+        var response = await gameServerClient.RequestEndGameAsync();
+
         if (ScoreManager.Instance != null)
         {
             ScoreManager.Instance.ResetScore();
         }
-        ResetRunState();
-        ResetGameplayUI();
 
-        if (playerTransform != null)
+        if (response != null && response.Success)
         {
-            playerTransform.position = new Vector3(
+            Debug.Log("[GameManager] 서버 상태 초기화 완료. 로비로 이동합니다.");
+            if (ScoreManager.Instance != null) ScoreManager.Instance.ResetScore();
+            ResetRunState();
+            ResetGameplayUI();
+
+            if (playerTransform != null) {
+                playerTransform.position = new Vector3(
                 playerResetPos.x,
                 playerResetPos.y,
                 playerTransform.position.z
             );
-        }
+            }
 
-        EnterLobbyState();
+            EnterLobbyState();
+        }
+        else
+        {
+            Debug.LogError("[GameManager] 서버 초기화 실패. 상태 불일치 발생 가능성 높음.");
+        }      
     }
 
     private void ResetRunState()

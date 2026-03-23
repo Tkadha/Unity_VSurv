@@ -8,4 +8,7 @@ public enum PacketId : byte
 
     PingRequest = 3,
     PingResponse = 4,
+
+    EndGameRequest = 5,
+    EndGameResponse = 6,
 }

@@ -1,5 +1,6 @@
 ﻿using System.Net.Sockets;
 using System.Text;
+using VSurvServer.Core.Game;
 using VSurvServer.Protocol.Packets;
 
 namespace VSurvServer.Core.Sessions;
@@ -14,6 +15,7 @@ public class ClientSession
 
     public int SessionId { get; }
     public bool IsConnected => !_isDisconnected && _tcpClient.Connected;
+    public GameRoom? CurrentRoom { get; set; }
 
     public ClientSession(int sessionId, TcpClient tcpClient)
     {

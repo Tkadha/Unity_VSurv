@@ -27,3 +27,16 @@ public class PingResponse
     public long ServerTimeTicks;
     public string Message;
 }
+
+[Serializable]
+public class EndGameRequest
+{
+    public PacketId PacketId => PacketId.EndGameRequest;
+}
+
+[Serializable]
+public class EndGameResponse
+{
+    public PacketId PacketId => PacketId.EndGameResponse;
+    public bool Success { get; set; }
+}

@@ -26,6 +26,8 @@ public class GameServerClient : MonoBehaviour
 
     private TaskCompletionSource<StartGameResponse> _pendingStartGameResponse;
     private TaskCompletionSource<PingResponse> _pendingPingResponse;
+    private TaskCompletionSource<EndGameResponse> _pendingEndGameResponse;
+
 
     public bool IsConnected => _tcpClient != null && _tcpClient.Connected;
 
@@ -136,6 +138,14 @@ public class GameServerClient : MonoBehaviour
         await SendPacketAsync(PacketId.StartGameRequest, requestJson);
 
         return await _pendingStartGameResponse.Task;
+    }
+    public async Task<EndGameResponse> RequestEndGameAsync()
+    {
+        if (!IsConnected) return new EndGameResponse { Success = false };
+
+        _pendingEndGameResponse = new TaskCompletionSource<EndGameResponse>();
+        await SendPacketAsync(PacketId.EndGameRequest, JsonUtility.ToJson(new EndGameRequest()));
+        return await _pendingEndGameResponse.Task;
     }
 
     public async Task<PingResponse> RequestPingAsync()

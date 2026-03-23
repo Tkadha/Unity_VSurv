@@ -30,3 +30,14 @@ public class PingResponse
     public long ServerTimeTicks { get; set; }
     public string Message { get; set; } = string.Empty;
 }
+
+public class EndGameRequest
+{
+    public PacketId PacketId => PacketId.EndGameRequest;
+}
+
+public class EndGameResponse
+{
+    public PacketId PacketId => PacketId.EndGameResponse;
+    public bool Success { get; set; }
+}

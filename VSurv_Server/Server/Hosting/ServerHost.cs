@@ -16,12 +16,10 @@ public class ServerHost
     private bool _isRunning;
 
     private readonly StartGameService _startGameService = new();
-    private ServerGameState _currentState = ServerGameState.Lobby;
 
     private readonly ConcurrentDictionary<int, ClientSession> _sessions = new();
     private int _nextSessionId = 0;
 
-    private readonly object _stateLock = new();
 
     public void Start()
     {
@@ -72,9 +70,9 @@ public class ServerHost
             try
             {
                 TcpClient tcpClient = await _listener.AcceptTcpClientAsync();
-
                 int sessionId = Interlocked.Increment(ref _nextSessionId);
                 ClientSession session = new ClientSession(sessionId, tcpClient);
+                session.CurrentRoom = new GameRoom(sessionId);
 
                 if (_sessions.TryAdd(sessionId, session))
                 {
@@ -123,21 +121,29 @@ public class ServerHost
                         }
                         else
                         {
-                            lock (_stateLock)
-                            {
-                                response = _startGameService.Handle(request, _currentState);
+                            bool success = session.CurrentRoom?.TryStartGame() ?? false;
 
-                                if (response.Success)
-                                {
-                                    _currentState = ServerGameState.Playing;
-                                }
-                            }
+                            response = new StartGameResponse
+                            {
+                                Success = success,
+                                Message = success ? "게임 시작 승인" : "시작 불가 상태"
+                            };
                         }
 
                         string responseJson = JsonSerializer.Serialize(response);
                         await session.SendPacketAsync(PacketId.StartGameResponse, responseJson);
 
                         ServerLogger.Info($"응답 데이터 전송 - SessionId: {session.SessionId}, PacketId: {PacketId.StartGameResponse}, Payload: {responseJson}");
+                        break;
+                    }
+
+                case PacketId.EndGameRequest:
+                    {
+                        session.CurrentRoom?.EndGame(); // 방 상태를 다시 Lobby로 초기화
+
+                        var response = new EndGameResponse { Success = true };
+                        string responseJson = JsonSerializer.Serialize(response);
+                        await session.SendPacketAsync(PacketId.EndGameResponse, responseJson);
                         break;
                     }
 
@@ -173,6 +179,8 @@ public class ServerHost
                         ServerLogger.Info($"응답 데이터 전송 - SessionId: {session.SessionId}, PacketId: {PacketId.PingResponse}, Payload: {responseJson}");
                         break;
                     }
+
+
                 default:
                     {
                         ServerLogger.Error($"알 수 없는 PacketId 수신 - SessionId: {session.SessionId}, PacketId: {packetId}");
