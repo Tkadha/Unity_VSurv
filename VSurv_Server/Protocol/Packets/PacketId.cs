@@ -12,4 +12,9 @@ public enum PacketId : byte
 
     EndGameRequest = 5,
     EndGameResponse = 6,
+
+    RegisterRequest = 7,
+    RegisterResponse = 8,
+    LoginRequest = 9,
+    LoginResponse = 10,
 }

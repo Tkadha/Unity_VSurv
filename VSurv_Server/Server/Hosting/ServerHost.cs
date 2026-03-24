@@ -5,6 +5,7 @@ using System.Text.Json;
 using VSurvServer.Core.Game;
 using VSurvServer.Core.Services;
 using VSurvServer.Core.Sessions;
+using VSurvServer.Infrastructure.Database;
 using VSurvServer.Infrastructure.Logging;
 using VSurvServer.Protocol.Packets;
 
@@ -15,7 +16,8 @@ public class ServerHost
     private TcpListener? _listener;
     private bool _isRunning;
 
-    private readonly StartGameService _startGameService = new();
+    private readonly RegisterService _registerService = new();
+    private readonly LoginService _loginService = new();
 
     private readonly ConcurrentDictionary<int, ClientSession> _sessions = new();
     private int _nextSessionId = 0;
@@ -27,6 +29,14 @@ public class ServerHost
         {
             return;
         }
+
+        ServerLogger.Info("데이터베이스 연결 확인 중...");
+        if (!DatabaseManager.TestConnection())
+        {
+            ServerLogger.Error("데이터베이스 연결에 실패하여 서버 구동을 중단합니다.");
+            return;
+        }
+        ServerLogger.Info("데이터베이스 연결 성공!");
 
         _listener = new TcpListener(IPAddress.Any, 7777);
         _listener.Start();
@@ -139,7 +149,10 @@ public class ServerHost
 
                 case PacketId.EndGameRequest:
                     {
-                        session.CurrentRoom?.EndGame(); // 방 상태를 다시 Lobby로 초기화
+                        if (session.CurrentRoom != null)
+                        {
+                            session.CurrentRoom.EndGame();
+                        }
 
                         var response = new EndGameResponse { Success = true };
                         string responseJson = JsonSerializer.Serialize(response);
@@ -180,7 +193,52 @@ public class ServerHost
                         break;
                     }
 
+                case PacketId.RegisterRequest:
+                    {
+                        RegisterRequest? request = JsonSerializer.Deserialize<RegisterRequest>(payloadJson);
+                        RegisterResponse response;
 
+                        if (request == null)
+                        {
+                            response = new RegisterResponse { Success = false, Message = "잘못된 요청 데이터입니다." };
+                        }
+                        else
+                        {
+                            response = _registerService.Handle(request);
+                        }
+
+
+                        string responseJson = JsonSerializer.Serialize(response);
+                        await session.SendPacketAsync(PacketId.RegisterResponse, responseJson);
+
+                        ServerLogger.Info($"회원가입 시도 - Username: {request?.Username}, 결과: {response.Success}");
+                        break;
+                    }
+
+                case PacketId.LoginRequest:
+                    {
+                        LoginRequest? request = JsonSerializer.Deserialize<LoginRequest>(payloadJson);
+                        LoginResponse response;
+
+                        if (request == null)
+                        {
+                            response = new LoginResponse { Success = false, Message = "잘못된 요청입니다." };
+                        }
+                        else
+                        {
+                            response = _loginService.Handle(request);
+
+                            if (response.Success)
+                            {
+                                session.LoggedInUserId = response.UserId;
+                                ServerLogger.Info($"유저 로그인 성공 - Username: {request.Username}, UserId: {response.UserId}");
+                            }
+                        }
+
+                        string responseJson = JsonSerializer.Serialize(response);
+                        await session.SendPacketAsync(PacketId.LoginResponse, responseJson);
+                        break;
+                    }
                 default:
                     {
                         ServerLogger.Error($"알 수 없는 PacketId 수신 - SessionId: {session.SessionId}, PacketId: {packetId}");

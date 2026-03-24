@@ -74,6 +74,7 @@
     <Compile Include="Assets\Scripts\UI\LobbyUI.cs" />
     <Compile Include="Assets\Scripts\Manager\ExperienceManager.cs" />
     <Compile Include="Assets\Scripts\HUDController.cs" />
+    <Compile Include="Assets\Scripts\UI\AuthUI.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
     <Compile Include="Assets\Scripts\Player\UpgradeType.cs" />
     <Compile Include="Assets\Scripts\UI\LevelUpUI.cs" />
@@ -1457,6 +1458,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="ParrelSync.csproj">
+      <Project>{EDBDC6FE-53E6-53A4-66F0-FE3360DC7D8B}</Project>
+      <Name>ParrelSync</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

@@ -27,7 +27,8 @@ public class GameServerClient : MonoBehaviour
     private TaskCompletionSource<StartGameResponse> _pendingStartGameResponse;
     private TaskCompletionSource<PingResponse> _pendingPingResponse;
     private TaskCompletionSource<EndGameResponse> _pendingEndGameResponse;
-
+    private TaskCompletionSource<RegisterResponse> _pendingRegisterResponse;
+    private TaskCompletionSource<LoginResponse> _pendingLoginResponse;
 
     public bool IsConnected => _tcpClient != null && _tcpClient.Connected;
 
@@ -168,6 +169,62 @@ public class GameServerClient : MonoBehaviour
         return await RequestPingInternalAsync();
     }
 
+    public async Task<RegisterResponse> RequestRegisterAsync(string username, string password)
+    {
+        if (!IsConnected)
+        {
+            bool connected = await ConnectAsync();
+            if (!connected)
+            {
+                return new RegisterResponse { Success = false, Message = "서버 연결에 실패했습니다." };
+            }
+        }
+
+        if (_pendingRegisterResponse != null && !_pendingRegisterResponse.Task.IsCompleted)
+        {
+            return new RegisterResponse { Success = false, Message = "이전 요청이 처리 중입니다." };
+        }
+
+        _pendingRegisterResponse = new TaskCompletionSource<RegisterResponse>();
+
+        RegisterRequest request = new RegisterRequest
+        {
+            Username = username,
+            Password = password
+        };
+
+        string requestJson = JsonUtility.ToJson(request);
+        await SendPacketAsync(PacketId.RegisterRequest, requestJson);
+
+        return await _pendingRegisterResponse.Task;
+    }
+
+    public async Task<LoginResponse> RequestLoginAsync(string username, string password)
+    {
+        if (!IsConnected)
+        {
+            bool connected = await ConnectAsync();
+            if (!connected) return new LoginResponse { Success = false, Message = "서버 연결에 실패했습니다." };
+        }
+
+        if (_pendingLoginResponse != null && !_pendingLoginResponse.Task.IsCompleted)
+        {
+            return new LoginResponse { Success = false, Message = "이전 요청이 처리 중입니다." };
+        }
+
+        _pendingLoginResponse = new TaskCompletionSource<LoginResponse>();
+
+        LoginRequest request = new LoginRequest
+        {
+            Username = username,
+            Password = password
+        };
+
+        string requestJson = JsonUtility.ToJson(request);
+        await SendPacketAsync(PacketId.LoginRequest, requestJson);
+
+        return await _pendingLoginResponse.Task;
+    }
     private async Task<PingResponse> RequestPingInternalAsync()
     {
         if (!IsConnected)
@@ -290,6 +347,20 @@ public class GameServerClient : MonoBehaviour
                     break;
                 }
 
+            case PacketId.EndGameResponse:
+                {
+                    EndGameResponse response = JsonUtility.FromJson<EndGameResponse>(result.PayloadJson);
+
+                    if (response == null)
+                    {
+                        response = new EndGameResponse { Success = false };
+                    }
+
+                    _pendingEndGameResponse?.TrySetResult(response);
+                    _pendingEndGameResponse = null;
+                    break;
+                }
+
             case PacketId.PingResponse:
                 {
                     PingResponse response = JsonUtility.FromJson<PingResponse>(result.PayloadJson);
@@ -310,6 +381,29 @@ public class GameServerClient : MonoBehaviour
                     break;
                 }
 
+            case PacketId.RegisterResponse:
+                {
+                    RegisterResponse response = JsonUtility.FromJson<RegisterResponse>(result.PayloadJson);
+
+                    if (response == null)
+                    {
+                        response = new RegisterResponse { Success = false, Message = "응답 파싱 실패" };
+                    }
+
+                    _pendingRegisterResponse?.TrySetResult(response);
+                    _pendingRegisterResponse = null;
+                    break;
+                }
+
+            case PacketId.LoginResponse:
+                {
+                    LoginResponse response = JsonUtility.FromJson<LoginResponse>(result.PayloadJson);
+                    if (response == null) response = new LoginResponse { Success = false, Message = "응답 파싱 실패" };
+
+                    _pendingLoginResponse?.TrySetResult(response);
+                    _pendingLoginResponse = null;
+                    break;
+                }
             default:
                 {
                     Debug.LogWarning($"[GameServerClient] 처리되지 않은 PacketId 수신: {result.PacketId}");

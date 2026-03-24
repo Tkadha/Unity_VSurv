@@ -1,16 +1,17 @@
 ﻿using UnityEngine;
-
+using System.Threading.Tasks;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
     public enum GameState
     {
+        Login,
         Lobby,
         Playing
     }
 
-    public GameState State { get; private set; } = GameState.Lobby;
+    public GameState State { get; private set; } = GameState.Login;
 
     [Header("References")]
     [SerializeField] private EnemySpawner enemySpawner;
@@ -20,6 +21,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private ExperienceManager experienceManager;
 
     [Header("UI References")]
+    [SerializeField] private GameObject authPanel;
     [SerializeField] private LobbyUI lobbyUI;
     [SerializeField] private GameObject hudRoot;
     [SerializeField] private LevelUpUI levelUpUI;
@@ -42,31 +44,22 @@ public class GameManager : MonoBehaviour
         Instance = this;
     }
 
-    private void Start()
+    private async void Start()
     {
-        EnterLobbyState();
+        EnterLoginState();
+        await ConnectToServerAsync();
     }
-    public async void RequestStartGame()
+    private async Task ConnectToServerAsync()
     {
-        if (gameServerClient == null)
-        {
-            Debug.LogError("[GameManager] GameServerClient 참조가 없습니다.");
-            return;
-        }
+        if (gameServerClient == null) return;
 
-        Debug.Log("[GameManager] 서버에 게임 시작 요청 전송");
+        Debug.Log("[GameManager] 서버 상시 연결 시도 중...");
+        bool isConnected = await gameServerClient.ConnectAsync();
 
-        StartGameResponse response = await gameServerClient.RequestStartGameAsync(playerName);
-
-        if (response.Success)
-        {
-            Debug.Log("[GameManager] 서버 승인 성공, 게임 시작");
-            StartGame();
-        }
+        if (isConnected)
+            Debug.Log("[GameManager] 서버 자동 연결 성공! (게임 종료 시까지 유지)");
         else
-        {
-            Debug.LogWarning($"[GameManager] 서버 승인 실패: {response.Message}");
-        }
+            Debug.LogError("[GameManager] 서버 연결 실패. 서버가 켜져 있는지 확인하세요.");
     }
 
     public void StartGame()
@@ -138,27 +131,29 @@ public class GameManager : MonoBehaviour
 
     private void ResetRunState()
     {
-        if (playerStats != null)
-            playerStats.ResetStats();
-
-        if (experienceManager != null)
-            experienceManager.ResetXp();
-
-        if (playerHealth != null)
-            playerHealth.ResetHealth();
-
-        if (ScoreManager.Instance != null)
-            ScoreManager.Instance.ResetScore();
+        if (playerStats != null) playerStats.ResetStats();
+        if (experienceManager != null) experienceManager.ResetXp();
+        if (playerHealth != null) playerHealth.ResetHealth();
+        if (ScoreManager.Instance != null) ScoreManager.Instance.ResetScore();
     }
     private void ResetGameplayUI()
     {
-        if (levelUpUI != null)
-            levelUpUI.Hide();
-
-        if (upgradeFeedbackUI != null)
-            upgradeFeedbackUI.HideImmediate();
-
+        if (levelUpUI != null) levelUpUI.Hide();
+        if (upgradeFeedbackUI != null) upgradeFeedbackUI.HideImmediate();
         Time.timeScale = 1f;
+    }
+
+    public void OnLoginSuccess(string username)
+    {
+        playerName = username; // 접속한 유저 이름 저장
+        Debug.Log($"[GameManager] 인증 성공. 유저명: {playerName}. 로비로 이동합니다.");
+        EnterLobbyState();
+    }
+
+    public void EnterLoginState()
+    {
+        State = GameState.Login;
+        ApplyUIByState();
     }
 
     private void EnterLobbyState()
@@ -173,8 +168,12 @@ public class GameManager : MonoBehaviour
 
     private void ApplyUIByState()
     {
+        bool isLogin = State == GameState.Login;
         bool isLobby = State == GameState.Lobby;
         bool isPlaying = State == GameState.Playing;
+
+        // 상태에 따라 패널 On/Off 스위칭
+        if (authPanel != null) authPanel.SetActive(isLogin);
 
         if (lobbyUI != null)
         {
@@ -182,23 +181,34 @@ public class GameManager : MonoBehaviour
             else lobbyUI.Hide();
         }
 
-        if (hudRoot != null)
-            hudRoot.SetActive(isPlaying);
-
-        if (levelUpUI != null)
-            levelUpUI.Hide();
-
-        if (upgradeFeedbackUI != null)
-            upgradeFeedbackUI.HideImmediate();
+        if (hudRoot != null) hudRoot.SetActive(isPlaying);
+        if (levelUpUI != null) levelUpUI.Hide();
+        if (upgradeFeedbackUI != null) upgradeFeedbackUI.HideImmediate();
     }
 
-    public bool IsLobbyState()
-    {
-        return State == GameState.Lobby;
-    }
+    public bool IsLobbyState() => State == GameState.Lobby;
+    public bool IsPlayingState() => State == GameState.Playing;
 
-    public bool IsPlayingState()
+    public async void RequestStartGame()
     {
-        return State == GameState.Playing;
+        if (gameServerClient == null)
+        {
+            Debug.LogError("[GameManager] GameServerClient 참조가 없습니다.");
+            return;
+        }
+
+        Debug.Log("[GameManager] 서버에 게임 시작 요청 전송");
+
+        StartGameResponse response = await gameServerClient.RequestStartGameAsync(playerName);
+
+        if (response.Success)
+        {
+            Debug.Log("[GameManager] 서버 승인 성공, 게임 시작");
+            StartGame();
+        }
+        else
+        {
+            Debug.LogWarning($"[GameManager] 서버 승인 실패: {response.Message}");
+        }
     }
 }

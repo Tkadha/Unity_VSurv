@@ -1,42 +1,45 @@
 ﻿using System;
 
 [Serializable]
-public class StartGameRequest
-{
-    public string PlayerName;
-}
+public class StartGameRequest { public string PlayerName; }
+[Serializable]
+public class StartGameResponse { public bool Success; public string Message; }
 
 [Serializable]
-public class StartGameResponse
+public class PingRequest { public long ClientTimeTicks; }
+[Serializable]
+public class PingResponse { public bool Success; public long ClientTimeTicks; public long ServerTimeTicks; public string Message; }
+
+[Serializable]
+public class EndGameRequest { }
+[Serializable]
+public class EndGameResponse { public bool Success; }
+
+// --- 회원가입 ---
+[Serializable]
+public class RegisterRequest
+{
+    public string Username;
+    public string Password;
+}
+[Serializable]
+public class RegisterResponse
 {
     public bool Success;
     public string Message;
 }
 
+// --- 로그인 ---
 [Serializable]
-public class PingRequest
+public class LoginRequest
 {
-    public long ClientTimeTicks;
+    public string Username;
+    public string Password;
 }
-
 [Serializable]
-public class PingResponse
+public class LoginResponse
 {
     public bool Success;
-    public long ClientTimeTicks;
-    public long ServerTimeTicks;
     public string Message;
-}
-
-[Serializable]
-public class EndGameRequest
-{
-    public PacketId PacketId => PacketId.EndGameRequest;
-}
-
-[Serializable]
-public class EndGameResponse
-{
-    public PacketId PacketId => PacketId.EndGameResponse;
-    public bool Success { get; set; }
+    public int UserId;
 }
