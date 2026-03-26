@@ -19,6 +19,7 @@ public class ServerHost
     private readonly RegisterService _registerService = new();
     private readonly LoginService _loginService = new();
     private readonly EndGameService _endGameService = new();
+    private readonly RankingService _rankingService = new();
 
     private readonly ConcurrentDictionary<int, ClientSession> _sessions = new();
     private int _nextSessionId = 0;
@@ -150,7 +151,7 @@ public class ServerHost
 
                 case PacketId.EndGameRequest:
                     {
-                        EndGameRequest? request = System.Text.Json.JsonSerializer.Deserialize<EndGameRequest>(payloadJson);
+                        EndGameRequest? request = JsonSerializer.Deserialize<EndGameRequest>(payloadJson);
                         EndGameResponse response;
 
                         if (request == null)
@@ -163,7 +164,7 @@ public class ServerHost
                             response = _endGameService.Handle(request, session, session.CurrentRoom);
                         }
 
-                        string responseJson = System.Text.Json.JsonSerializer.Serialize(response);
+                        string responseJson = JsonSerializer.Serialize(response);
                         await session.SendPacketAsync(PacketId.EndGameResponse, responseJson);
                         break;
                     }
@@ -247,6 +248,26 @@ public class ServerHost
                         await session.SendPacketAsync(PacketId.LoginResponse, responseJson);
                         break;
                     }
+
+                case PacketId.RankingRequest:
+                    {
+                        RankingRequest? request = JsonSerializer.Deserialize<RankingRequest>(payloadJson);
+                        RankingResponse response;
+
+                        if (request == null)
+                        {
+                            response = new RankingResponse { Success = false, TopRanks = Array.Empty<RankEntry>() };
+                        }
+                        else
+                        {
+                            response = _rankingService.Handle(request);
+                        }
+
+                        string responseJson = JsonSerializer.Serialize(response);
+                        await session.SendPacketAsync(PacketId.RankingResponse, responseJson);
+                        break;
+                    }
+
                 default:
                     {
                         ServerLogger.Error($"알 수 없는 PacketId 수신 - SessionId: {session.SessionId}, PacketId: {packetId}");

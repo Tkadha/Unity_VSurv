@@ -43,3 +43,23 @@ public class LoginResponse
     public string Message;
     public int UserId;
 }
+
+[Serializable]
+public class RankingRequest
+{
+}
+
+[Serializable]
+public class RankEntry
+{
+    public int Rank;
+    public string Username;
+    public int Score;
+}
+
+[Serializable]
+public class RankingResponse
+{
+    public bool Success;
+    public RankEntry[] TopRanks; // 랭킹 배열
+}

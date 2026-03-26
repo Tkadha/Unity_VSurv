@@ -15,4 +15,7 @@
     RegisterResponse = 8,
     LoginRequest = 9,
     LoginResponse = 10,
+
+    RankingRequest = 11,
+    RankingResponse = 12,
 }

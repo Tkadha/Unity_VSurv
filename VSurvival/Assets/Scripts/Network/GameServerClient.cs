@@ -29,6 +29,7 @@ public class GameServerClient : MonoBehaviour
     private TaskCompletionSource<EndGameResponse> _pendingEndGameResponse;
     private TaskCompletionSource<RegisterResponse> _pendingRegisterResponse;
     private TaskCompletionSource<LoginResponse> _pendingLoginResponse;
+    private TaskCompletionSource<RankingResponse> _pendingRankingResponse;
 
     public bool IsConnected => _tcpClient != null && _tcpClient.Connected;
 
@@ -104,6 +105,110 @@ public class GameServerClient : MonoBehaviour
         Debug.Log("[GameServerClient] 서버 연결 종료");
     }
 
+    private void HandleReceivedPacket(PacketReadResult result)
+    {
+        Debug.Log($"[GameServerClient] 수신 패킷 - PacketId: {result.PacketId}, Payload: {result.PayloadJson}");
+
+        switch (result.PacketId)
+        {
+            case PacketId.StartGameResponse:
+                {
+                    StartGameResponse response = JsonUtility.FromJson<StartGameResponse>(result.PayloadJson);
+
+                    if (response == null)
+                    {
+                        response = new StartGameResponse
+                        {
+                            Success = false,
+                            Message = "StartGame 응답 파싱에 실패했습니다."
+                        };
+                    }
+
+                    _pendingStartGameResponse?.TrySetResult(response);
+                    _pendingStartGameResponse = null;
+                    break;
+                }
+
+            case PacketId.EndGameResponse:
+                {
+                    EndGameResponse response = JsonUtility.FromJson<EndGameResponse>(result.PayloadJson);
+
+                    if (response == null)
+                    {
+                        response = new EndGameResponse { Success = false };
+                    }
+
+                    _pendingEndGameResponse?.TrySetResult(response);
+                    _pendingEndGameResponse = null;
+                    break;
+                }
+
+            case PacketId.PingResponse:
+                {
+                    PingResponse response = JsonUtility.FromJson<PingResponse>(result.PayloadJson);
+
+                    if (response == null)
+                    {
+                        response = new PingResponse
+                        {
+                            Success = false,
+                            Message = "Ping 응답 파싱에 실패했습니다.",
+                            ClientTimeTicks = 0,
+                            ServerTimeTicks = 0
+                        };
+                    }
+
+                    _pendingPingResponse?.TrySetResult(response);
+                    _pendingPingResponse = null;
+                    break;
+                }
+
+            case PacketId.RegisterResponse:
+                {
+                    RegisterResponse response = JsonUtility.FromJson<RegisterResponse>(result.PayloadJson);
+
+                    if (response == null)
+                    {
+                        response = new RegisterResponse { Success = false, Message = "응답 파싱 실패" };
+                    }
+
+                    _pendingRegisterResponse?.TrySetResult(response);
+                    _pendingRegisterResponse = null;
+                    break;
+                }
+
+            case PacketId.LoginResponse:
+                {
+                    LoginResponse response = JsonUtility.FromJson<LoginResponse>(result.PayloadJson);
+                    if (response == null) response = new LoginResponse { Success = false, Message = "응답 파싱 실패" };
+
+                    _pendingLoginResponse?.TrySetResult(response);
+                    _pendingLoginResponse = null;
+                    break;
+                }
+
+            case PacketId.RankingResponse:
+                {
+                    RankingResponse response = JsonUtility.FromJson<RankingResponse>(result.PayloadJson);
+
+                    if (response == null)
+                    {
+                        response = new RankingResponse { Success = false, TopRanks = new RankEntry[0] };
+                    }
+
+                    _pendingRankingResponse?.TrySetResult(response);
+                    _pendingRankingResponse = null;
+                    break;
+                }
+            default:
+                {
+                    Debug.LogWarning($"[GameServerClient] 처리되지 않은 PacketId 수신: {result.PacketId}");
+                    break;
+                }
+        }
+    }
+
+
     public async Task<StartGameResponse> RequestStartGameAsync(string playerName)
     {
         if (!IsConnected)
@@ -157,7 +262,6 @@ public class GameServerClient : MonoBehaviour
         await SendPacketAsync(PacketId.EndGameRequest, requestJson);
         return await _pendingEndGameResponse.Task;
     }
-
     public async Task<PingResponse> RequestPingAsync()
     {
         if (!IsConnected)
@@ -177,7 +281,6 @@ public class GameServerClient : MonoBehaviour
 
         return await RequestPingInternalAsync();
     }
-
     public async Task<RegisterResponse> RequestRegisterAsync(string username, string password)
     {
         if (!IsConnected)
@@ -207,7 +310,6 @@ public class GameServerClient : MonoBehaviour
 
         return await _pendingRegisterResponse.Task;
     }
-
     public async Task<LoginResponse> RequestLoginAsync(string username, string password)
     {
         if (!IsConnected)
@@ -233,6 +335,28 @@ public class GameServerClient : MonoBehaviour
         await SendPacketAsync(PacketId.LoginRequest, requestJson);
 
         return await _pendingLoginResponse.Task;
+    }
+    public async Task<RankingResponse> RequestRankingAsync()
+    {
+        if (!IsConnected)
+        {
+            bool connected = await ConnectAsync();
+            if (!connected) return new RankingResponse { Success = false };
+        }
+
+        if (_pendingRankingResponse != null && !_pendingRankingResponse.Task.IsCompleted)
+        {
+            return new RankingResponse { Success = false };
+        }
+
+        _pendingRankingResponse = new TaskCompletionSource<RankingResponse>();
+
+        RankingRequest request = new RankingRequest();
+        string requestJson = JsonUtility.ToJson(request);
+
+        await SendPacketAsync(PacketId.RankingRequest, requestJson);
+
+        return await _pendingRankingResponse.Task;
     }
     private async Task<PingResponse> RequestPingInternalAsync()
     {
@@ -332,95 +456,6 @@ public class GameServerClient : MonoBehaviour
             Debug.LogError($"[GameServerClient] RunPingLoopAsync 예외: {ex.Message}");
         }
     }
-    private void HandleReceivedPacket(PacketReadResult result)
-    {
-        Debug.Log($"[GameServerClient] 수신 패킷 - PacketId: {result.PacketId}, Payload: {result.PayloadJson}");
-
-        switch (result.PacketId)
-        {
-            case PacketId.StartGameResponse:
-                {
-                    StartGameResponse response = JsonUtility.FromJson<StartGameResponse>(result.PayloadJson);
-
-                    if (response == null)
-                    {
-                        response = new StartGameResponse
-                        {
-                            Success = false,
-                            Message = "StartGame 응답 파싱에 실패했습니다."
-                        };
-                    }
-
-                    _pendingStartGameResponse?.TrySetResult(response);
-                    _pendingStartGameResponse = null;
-                    break;
-                }
-
-            case PacketId.EndGameResponse:
-                {
-                    EndGameResponse response = JsonUtility.FromJson<EndGameResponse>(result.PayloadJson);
-
-                    if (response == null)
-                    {
-                        response = new EndGameResponse { Success = false };
-                    }
-
-                    _pendingEndGameResponse?.TrySetResult(response);
-                    _pendingEndGameResponse = null;
-                    break;
-                }
-
-            case PacketId.PingResponse:
-                {
-                    PingResponse response = JsonUtility.FromJson<PingResponse>(result.PayloadJson);
-
-                    if (response == null)
-                    {
-                        response = new PingResponse
-                        {
-                            Success = false,
-                            Message = "Ping 응답 파싱에 실패했습니다.",
-                            ClientTimeTicks = 0,
-                            ServerTimeTicks = 0
-                        };
-                    }
-
-                    _pendingPingResponse?.TrySetResult(response);
-                    _pendingPingResponse = null;
-                    break;
-                }
-
-            case PacketId.RegisterResponse:
-                {
-                    RegisterResponse response = JsonUtility.FromJson<RegisterResponse>(result.PayloadJson);
-
-                    if (response == null)
-                    {
-                        response = new RegisterResponse { Success = false, Message = "응답 파싱 실패" };
-                    }
-
-                    _pendingRegisterResponse?.TrySetResult(response);
-                    _pendingRegisterResponse = null;
-                    break;
-                }
-
-            case PacketId.LoginResponse:
-                {
-                    LoginResponse response = JsonUtility.FromJson<LoginResponse>(result.PayloadJson);
-                    if (response == null) response = new LoginResponse { Success = false, Message = "응답 파싱 실패" };
-
-                    _pendingLoginResponse?.TrySetResult(response);
-                    _pendingLoginResponse = null;
-                    break;
-                }
-            default:
-                {
-                    Debug.LogWarning($"[GameServerClient] 처리되지 않은 PacketId 수신: {result.PacketId}");
-                    break;
-                }
-        }
-    }
-
     private async Task SendPacketAsync(PacketId packetId, string payloadJson)
     {
         if (!IsConnected || _stream == null)

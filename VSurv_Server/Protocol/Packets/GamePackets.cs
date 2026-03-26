@@ -74,3 +74,22 @@ public class LoginResponse
     public string Message { get; set; } = string.Empty;
     public int UserId { get; set; } // 성공 시 발급받는 고유 유저 번호
 }
+
+public class RankingRequest
+{
+    public PacketId PacketId => PacketId.RankingRequest;
+}
+
+public class RankEntry
+{
+    public int Rank { get; set; }
+    public string? Username { get; set; }
+    public int Score { get; set; }
+}
+
+public class RankingResponse
+{
+    public PacketId PacketId => PacketId.RankingResponse;
+    public bool Success { get; set; }
+    public RankEntry[]? TopRanks { get; set; }
+}
