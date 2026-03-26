@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform playerTransform;
     [SerializeField] private PlayerStats playerStats;
     [SerializeField] private ExperienceManager experienceManager;
+    [SerializeField] private ScoreManager scoreManager;
 
     [Header("UI References")]
     [SerializeField] private GameObject authPanel;
@@ -98,18 +99,20 @@ public class GameManager : MonoBehaviour
             enemySpawner.SetSpawning(false);
             enemySpawner.ClearAllEnemies();
         }
-        Debug.Log("[GameManager] 서버에 게임 종료 보고 및 초기화 대기 중...");
-        var response = await gameServerClient.RequestEndGameAsync();
-
-        if (ScoreManager.Instance != null)
+        int finalScore = 0;
+        if (scoreManager != null)
         {
-            ScoreManager.Instance.ResetScore();
+            finalScore = scoreManager.CurrentScore;
         }
+
+        Debug.Log($"[GameManager] 서버에 게임 종료 보고 (점수: {finalScore})...");
+
+        var response = await gameServerClient.RequestEndGameAsync(finalScore);
 
         if (response != null && response.Success)
         {
             Debug.Log("[GameManager] 서버 상태 초기화 완료. 로비로 이동합니다.");
-            if (ScoreManager.Instance != null) ScoreManager.Instance.ResetScore();
+            if (scoreManager != null) scoreManager.ResetScore();
             ResetRunState();
             ResetGameplayUI();
 

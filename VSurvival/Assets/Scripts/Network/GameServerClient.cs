@@ -140,12 +140,21 @@ public class GameServerClient : MonoBehaviour
 
         return await _pendingStartGameResponse.Task;
     }
-    public async Task<EndGameResponse> RequestEndGameAsync()
+    public async Task<EndGameResponse> RequestEndGameAsync(int score)
     {
         if (!IsConnected) return new EndGameResponse { Success = false };
 
+        if (_pendingEndGameResponse != null && !_pendingEndGameResponse.Task.IsCompleted)
+        {
+            return new EndGameResponse { Success = false };
+        }
+
         _pendingEndGameResponse = new TaskCompletionSource<EndGameResponse>();
-        await SendPacketAsync(PacketId.EndGameRequest, JsonUtility.ToJson(new EndGameRequest()));
+
+        EndGameRequest request = new EndGameRequest { Score = score };
+        string requestJson = JsonUtility.ToJson(request);
+
+        await SendPacketAsync(PacketId.EndGameRequest, requestJson);
         return await _pendingEndGameResponse.Task;
     }
 

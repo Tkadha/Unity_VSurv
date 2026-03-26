@@ -18,6 +18,7 @@ public class ServerHost
 
     private readonly RegisterService _registerService = new();
     private readonly LoginService _loginService = new();
+    private readonly EndGameService _endGameService = new();
 
     private readonly ConcurrentDictionary<int, ClientSession> _sessions = new();
     private int _nextSessionId = 0;
@@ -149,13 +150,20 @@ public class ServerHost
 
                 case PacketId.EndGameRequest:
                     {
-                        if (session.CurrentRoom != null)
+                        EndGameRequest? request = System.Text.Json.JsonSerializer.Deserialize<EndGameRequest>(payloadJson);
+                        EndGameResponse response;
+
+                        if (request == null)
                         {
-                            session.CurrentRoom.EndGame();
+                            response = new EndGameResponse { Success = false };
+                        }
+                        else
+                        {
+                            // 💡 세션 정보와 방 정보를 서비스로 넘김
+                            response = _endGameService.Handle(request, session, session.CurrentRoom);
                         }
 
-                        var response = new EndGameResponse { Success = true };
-                        string responseJson = JsonSerializer.Serialize(response);
+                        string responseJson = System.Text.Json.JsonSerializer.Serialize(response);
                         await session.SendPacketAsync(PacketId.EndGameResponse, responseJson);
                         break;
                     }

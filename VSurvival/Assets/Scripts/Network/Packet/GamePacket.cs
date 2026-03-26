@@ -11,7 +11,7 @@ public class PingRequest { public long ClientTimeTicks; }
 public class PingResponse { public bool Success; public long ClientTimeTicks; public long ServerTimeTicks; public string Message; }
 
 [Serializable]
-public class EndGameRequest { }
+public class EndGameRequest { public int Score; }
 [Serializable]
 public class EndGameResponse { public bool Success; }
 

@@ -5055,6 +5055,7 @@ MonoBehaviour:
   playerTransform: {fileID: 186518045}
   playerStats: {fileID: 1464855451}
   experienceManager: {fileID: 1957536464}
+  scoreManager: {fileID: 1295384493}
   authPanel: {fileID: 805936240}
   lobbyUI: {fileID: 1235293064}
   hudRoot: {fileID: 744305990}

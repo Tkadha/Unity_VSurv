@@ -34,6 +34,8 @@ public class PingResponse
 public class EndGameRequest
 {
     public PacketId PacketId => PacketId.EndGameRequest;
+
+    public int Score { get; set; }
 }
 
 public class EndGameResponse
