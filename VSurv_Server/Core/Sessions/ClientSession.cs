@@ -17,6 +17,7 @@ public class ClientSession
     public bool IsConnected => !_isDisconnected && _tcpClient.Connected;
     public GameRoom? CurrentRoom { get; set; }
     public int LoggedInUserId { get; set; } = 0;
+    public string LoggedInUsername { get; set; } = string.Empty;
 
     public ClientSession(int sessionId, TcpClient tcpClient)
     {

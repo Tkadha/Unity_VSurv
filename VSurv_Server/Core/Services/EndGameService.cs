@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using Dapper;
+using StackExchange.Redis;
 using VSurvServer.Core.Game;
 using VSurvServer.Core.Sessions;
 using VSurvServer.Infrastructure.Database;
@@ -40,6 +41,25 @@ public class EndGameService
         catch (Exception ex)
         {
             ServerLogger.Error($"점수 저장 중 DB 오류 발생: {ex.Message}");
+        }
+
+        try
+        {
+            var redisDb = RedisManager.GetDatabase();
+            string rankingKey = "GlobalRanking";
+            string memberName = session.LoggedInUsername;
+
+            double? currentRedisScore = redisDb.SortedSetScore(rankingKey, memberName);
+
+            if (currentRedisScore == null || request.Score > currentRedisScore.Value)
+            {
+                redisDb.SortedSetAdd(rankingKey, memberName, request.Score);
+                ServerLogger.Info($"[Redis] 랭킹 갱신 완료 - {memberName}: {request.Score}점");
+            }
+        }
+        catch (Exception ex)
+        {
+            ServerLogger.Error($"[Redis] 점수 갱신 중 오류: {ex.Message}");
         }
 
         return new EndGameResponse { Success = true };

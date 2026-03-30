@@ -40,6 +40,14 @@ public class ServerHost
         }
         ServerLogger.Info("데이터베이스 연결 성공!");
 
+        ServerLogger.Info("Redis 캐시 서버 연결 확인 중...");
+        if (!RedisManager.Initialize())
+        {
+            ServerLogger.Error("Redis 연결 실패로 서버 구동을 중단합니다. redis-server가 켜져 있는지 확인하세요.");
+            return;
+        }
+        ServerLogger.Info("Redis 연결 성공!");
+
         _listener = new TcpListener(IPAddress.Any, 7777);
         _listener.Start();
         _isRunning = true;
@@ -240,6 +248,7 @@ public class ServerHost
                             if (response.Success)
                             {
                                 session.LoggedInUserId = response.UserId;
+                                session.LoggedInUsername = request.Username;
                                 ServerLogger.Info($"유저 로그인 성공 - Username: {request.Username}, UserId: {response.UserId}");
                             }
                         }
