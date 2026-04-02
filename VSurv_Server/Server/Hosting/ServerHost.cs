@@ -47,6 +47,8 @@ public class ServerHost
             return;
         }
         ServerLogger.Info("Redis 연결 성공!");
+        VSurvServer.Core.Services.RankingService.WarmUpCache();
+
 
         _listener = new TcpListener(IPAddress.Any, 7777);
         _listener.Start();
