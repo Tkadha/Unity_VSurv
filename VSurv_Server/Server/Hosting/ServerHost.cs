@@ -47,6 +47,8 @@ public class ServerHost
             return;
         }
         ServerLogger.Info("Redis 연결 성공!");
+
+        VSurvServer.Core.Game.WeaponDataManager.LoadAllWeapons();
         VSurvServer.Core.Services.RankingService.WarmUpCache();
 
 

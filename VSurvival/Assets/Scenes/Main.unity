@@ -1119,7 +1119,7 @@ MonoBehaviour:
   playerStats: {fileID: 1464855451}
   fireInterval: 0.5
   range: 8
-  projectileDamage: 1
+  projectileDamage: 5
 --- !u!1 &202529443
 GameObject:
   m_ObjectHideFlags: 0
@@ -4619,7 +4619,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   spawnArea: {fileID: 0}
-  baseHp: 3
+  baseHp: 30
   hpGrowthPerSecond: 0.05
 --- !u!61 &1371839024
 BoxCollider2D:
