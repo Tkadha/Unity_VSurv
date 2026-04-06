@@ -20,6 +20,7 @@ public class ServerHost
     private readonly LoginService _loginService = new();
     private readonly EndGameService _endGameService = new();
     private readonly RankingService _rankingService = new();
+    private readonly GachaService _gachaService = new();
 
     private readonly ConcurrentDictionary<int, ClientSession> _sessions = new();
     private int _nextSessionId = 0;
@@ -48,8 +49,8 @@ public class ServerHost
         }
         ServerLogger.Info("Redis 연결 성공!");
 
-        VSurvServer.Core.Game.WeaponDataManager.LoadAllWeapons();
-        VSurvServer.Core.Services.RankingService.WarmUpCache();
+        WeaponDataManager.LoadAllWeapons();
+        RankingService.WarmUpCache();
 
 
         _listener = new TcpListener(IPAddress.Any, 7777);
@@ -278,6 +279,31 @@ public class ServerHost
 
                         string responseJson = JsonSerializer.Serialize(response);
                         await session.SendPacketAsync(PacketId.RankingResponse, responseJson);
+                        break;
+                    }
+
+                case PacketId.GachaRequest:
+                    {
+                        GachaRequest? request = JsonSerializer.Deserialize<GachaRequest>(payloadJson);
+                        GachaResponse response;
+
+                        if (request == null)
+                        {
+                            response = new GachaResponse
+                            {
+                                Success = false,
+                                Message = "잘못된 가챠 요청입니다."
+                            };
+                        }
+                        else
+                        {
+                            response = _gachaService.Handle(request, session);
+                        }
+
+                        string responseJson = JsonSerializer.Serialize(response);
+                        await session.SendPacketAsync(PacketId.GachaResponse, responseJson);
+
+                        ServerLogger.Info($"응답 데이터 전송 - SessionId: {session.SessionId}, PacketId: {PacketId.GachaResponse}, Payload: {responseJson}");
                         break;
                     }
 

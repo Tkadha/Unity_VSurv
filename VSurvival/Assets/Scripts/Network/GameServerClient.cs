@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using static UnityEngine.Audio.ProcessorInstance;
 
 public class GameServerClient : MonoBehaviour
 {
@@ -30,6 +31,7 @@ public class GameServerClient : MonoBehaviour
     private TaskCompletionSource<RegisterResponse> _pendingRegisterResponse;
     private TaskCompletionSource<LoginResponse> _pendingLoginResponse;
     private TaskCompletionSource<RankingResponse> _pendingRankingResponse;
+    private TaskCompletionSource<GachaResponse> _pendingGachaResponse;
 
     public bool IsConnected => _tcpClient != null && _tcpClient.Connected;
 
@@ -198,6 +200,16 @@ public class GameServerClient : MonoBehaviour
 
                     _pendingRankingResponse?.TrySetResult(response);
                     _pendingRankingResponse = null;
+                    break;
+                }
+
+            case PacketId.GachaResponse:
+                {
+                    GachaResponse response = JsonUtility.FromJson<GachaResponse>(result.PayloadJson);
+                    if (response == null) response = new GachaResponse { Success = false, Message = "응답 파싱 실패" };
+
+                    _pendingGachaResponse?.TrySetResult(response);
+                    _pendingGachaResponse = null;
                     break;
                 }
             default:
@@ -394,6 +406,33 @@ public class GameServerClient : MonoBehaviour
 
         return await _pendingPingResponse.Task;
     }
+    public async Task<GachaResponse> RequestGachaAsync()
+    {
+        // 1. 연결 상태 확인
+        if (!IsConnected)
+        {
+            bool connected = await ConnectAsync();
+            if (!connected)
+            {
+                return new GachaResponse { Success = false, Message = "서버 연결에 실패했습니다." };
+            }
+        }
+
+        if (_pendingGachaResponse != null && !_pendingGachaResponse.Task.IsCompleted)
+        {
+            return new GachaResponse { Success = false, Message = "이전 가챠 요청이 처리 중입니다." };
+        }
+
+        _pendingGachaResponse = new TaskCompletionSource<GachaResponse>();
+
+        
+        GachaRequest request = new GachaRequest();
+        string requestJson = JsonUtility.ToJson(request);
+
+        await SendPacketAsync(PacketId.GachaRequest, requestJson);
+
+        return await _pendingGachaResponse.Task;
+    }
     private async Task RunReceiveLoopAsync(CancellationToken cancellationToken)
     {
         try
@@ -474,7 +513,6 @@ public class GameServerClient : MonoBehaviour
 
         await _stream.WriteAsync(packetBuffer, 0, packetBuffer.Length);
     }
-
     private async Task<PacketReadResult> ReceivePacketAsync(CancellationToken cancellationToken)
     {
         if (!IsConnected || _stream == null)
@@ -529,6 +567,9 @@ public class GameServerClient : MonoBehaviour
 
         return buffer;
     }
+
+
+
 
     private void FailPendingRequests(string message)
     {

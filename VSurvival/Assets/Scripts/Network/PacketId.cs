@@ -18,4 +18,7 @@
 
     RankingRequest = 11,
     RankingResponse = 12,
+
+    GachaRequest = 13,
+    GachaResponse = 14,
 }

@@ -64,4 +64,8 @@ public static class WeaponDataManager
         }
         return null; // 없는 무기 번호를 요청했을 때
     }
+    public static List<WeaponDefinition> GetAllWeapons()
+    {
+        return _weapons.Values.ToList();
+    }
 }

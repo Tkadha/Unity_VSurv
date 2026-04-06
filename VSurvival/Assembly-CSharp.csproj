@@ -74,6 +74,7 @@
     <Compile Include="Assets\Scripts\UI\LobbyUI.cs" />
     <Compile Include="Assets\Scripts\Manager\ExperienceManager.cs" />
     <Compile Include="Assets\Scripts\HUDController.cs" />
+    <Compile Include="Assets\Scripts\Network\Packet\GachaPacket.cs" />
     <Compile Include="Assets\Scripts\UI\AuthUI.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
     <Compile Include="Assets\Scripts\Player\UpgradeType.cs" />

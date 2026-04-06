@@ -20,4 +20,11 @@ public enum PacketId : byte
 
     RankingRequest = 11,
     RankingResponse = 12,
+
+    GachaRequest = 13,
+    GachaResponse = 14,
+    InventoryRequest = 15,
+    InventoryResponse = 16,
+    EquipRequest = 17,
+    EquipResponse = 18
 }
