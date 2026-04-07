@@ -50,7 +50,15 @@ public class AutoShooter : MonoBehaviour
 
         p.Fire(dir, finalDamage);
     }
+    public void EquipWeapon(WeaponStatData weaponData)
+    {
+        if (weaponData == null) return;
 
+        projectileDamage = weaponData.AttackPower;
+        fireInterval = weaponData.FireInterval;
+
+        Debug.Log($"[무기 장착됨] 공격력: {projectileDamage}, 연사간격: {fireInterval}초");
+    }
     private Transform FindNearestEnemy()
     {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");

@@ -21,4 +21,8 @@
 
     GachaRequest = 13,
     GachaResponse = 14,
+    InventoryRequest = 15,
+    InventoryResponse = 16,
+    EquipRequest = 17,
+    EquipResponse = 18
 }

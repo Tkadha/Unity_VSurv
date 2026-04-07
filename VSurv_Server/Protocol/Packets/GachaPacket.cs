@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace VSurvServer.Protocol.Packets;
+﻿namespace VSurvServer.Protocol.Packets;
 
 public class GachaRequest
 {

@@ -21,6 +21,8 @@ public class ServerHost
     private readonly EndGameService _endGameService = new();
     private readonly RankingService _rankingService = new();
     private readonly GachaService _gachaService = new();
+    private readonly InventoryService _inventoryService = new();
+    private readonly EquipService _equipService = new();
 
     private readonly ConcurrentDictionary<int, ClientSession> _sessions = new();
     private int _nextSessionId = 0;
@@ -306,7 +308,54 @@ public class ServerHost
                         ServerLogger.Info($"응답 데이터 전송 - SessionId: {session.SessionId}, PacketId: {PacketId.GachaResponse}, Payload: {responseJson}");
                         break;
                     }
+                case PacketId.InventoryRequest:
+                    {
+                        InventoryRequest? request = JsonSerializer.Deserialize<InventoryRequest>(payloadJson);
+                        InventoryResponse response;
 
+                        if (request == null)
+                        {
+                            response = new InventoryResponse
+                            {
+                                Success = false,
+                                Message = "잘못된 인벤토리 요청입니다."
+                            };
+                        }
+                        else
+                        {
+                            response = _inventoryService.Handle(request, session);
+                        }
+
+                        string responseJson = JsonSerializer.Serialize(response);
+                        await session.SendPacketAsync(PacketId.InventoryResponse, responseJson);
+
+                        ServerLogger.Info($"응답 데이터 전송 - SessionId: {session.SessionId}, PacketId: {PacketId.InventoryResponse}, Payload: {responseJson}");
+                        break;
+                    }
+                case PacketId.EquipRequest:
+                    {
+                        EquipRequest? request = JsonSerializer.Deserialize<EquipRequest>(payloadJson);
+                        EquipResponse response;
+
+                        if (request == null)
+                        {
+                            response = new EquipResponse
+                            {
+                                Success = false,
+                                Message = "잘못된 무기 장착 요청입니다."
+                            };
+                        }
+                        else
+                        {
+                            response = _equipService.Handle(request, session);
+                        }
+
+                        string responseJson = JsonSerializer.Serialize(response);
+                        await session.SendPacketAsync(PacketId.EquipResponse, responseJson);
+
+                        ServerLogger.Info($"응답 데이터 전송 - SessionId: {session.SessionId}, PacketId: {PacketId.EquipResponse}, Payload: {responseJson}");
+                        break;
+                    }
                 default:
                     {
                         ServerLogger.Error($"알 수 없는 PacketId 수신 - SessionId: {session.SessionId}, PacketId: {packetId}");

@@ -32,6 +32,8 @@ public class GameServerClient : MonoBehaviour
     private TaskCompletionSource<LoginResponse> _pendingLoginResponse;
     private TaskCompletionSource<RankingResponse> _pendingRankingResponse;
     private TaskCompletionSource<GachaResponse> _pendingGachaResponse;
+    private TaskCompletionSource<InventoryResponse> _pendingInventoryResponse;
+    private TaskCompletionSource<EquipResponse> _pendingEquipResponse;
 
     public bool IsConnected => _tcpClient != null && _tcpClient.Connected;
 
@@ -210,6 +212,26 @@ public class GameServerClient : MonoBehaviour
 
                     _pendingGachaResponse?.TrySetResult(response);
                     _pendingGachaResponse = null;
+                    break;
+                }
+
+            case PacketId.InventoryResponse:
+                {
+                    InventoryResponse response = JsonUtility.FromJson<InventoryResponse>(result.PayloadJson);
+                    if (response == null) response = new InventoryResponse { Success = false, Message = "응답 파싱 실패" };
+
+                    _pendingInventoryResponse?.TrySetResult(response);
+                    _pendingInventoryResponse = null;
+                    break;
+                }
+
+            case PacketId.EquipResponse:
+                {
+                    EquipResponse response = JsonUtility.FromJson<EquipResponse>(result.PayloadJson);
+                    if (response == null) response = new EquipResponse { Success = false, Message = "응답 파싱 실패" };
+
+                    _pendingEquipResponse?.TrySetResult(response);
+                    _pendingEquipResponse = null;
                     break;
                 }
             default:
@@ -432,6 +454,34 @@ public class GameServerClient : MonoBehaviour
         await SendPacketAsync(PacketId.GachaRequest, requestJson);
 
         return await _pendingGachaResponse.Task;
+    }
+    public async Task<InventoryResponse> RequestInventoryAsync()
+    {
+        if (!IsConnected) return new InventoryResponse { Success = false, Message = "연결 안됨" };
+        if (_pendingInventoryResponse != null && !_pendingInventoryResponse.Task.IsCompleted)
+            return new InventoryResponse { Success = false, Message = "처리 중" };
+
+        _pendingInventoryResponse = new TaskCompletionSource<InventoryResponse>();
+
+        InventoryRequest request = new InventoryRequest();
+        string requestJson = JsonUtility.ToJson(request);
+        await SendPacketAsync(PacketId.InventoryRequest, requestJson);
+
+        return await _pendingInventoryResponse.Task;
+    }
+    public async Task<EquipResponse> RequestEquipAsync(int weaponId)
+    {
+        if (!IsConnected) return new EquipResponse { Success = false, Message = "연결 안됨" };
+        if (_pendingEquipResponse != null && !_pendingEquipResponse.Task.IsCompleted)
+            return new EquipResponse { Success = false, Message = "처리 중" };
+
+        _pendingEquipResponse = new TaskCompletionSource<EquipResponse>();
+
+        EquipRequest request = new EquipRequest { WeaponId = weaponId };
+        string requestJson = JsonUtility.ToJson(request);
+        await SendPacketAsync(PacketId.EquipRequest, requestJson);
+
+        return await _pendingEquipResponse.Task;
     }
     private async Task RunReceiveLoopAsync(CancellationToken cancellationToken)
     {

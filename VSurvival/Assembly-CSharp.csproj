@@ -65,7 +65,9 @@
     <Compile Include="Assets\Scripts\Player\AutoShooter.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyHealth.cs" />
     <Compile Include="Assets\Scripts\Projectile\Projectile.cs" />
+    <Compile Include="Assets\Scripts\Weapon\WeaponStatData.cs" />
     <Compile Include="Assets\Scripts\Manager\GameManager.cs" />
+    <Compile Include="Assets\Scripts\UI\InventoryUI.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyVisualRandomizer.cs" />
     <Compile Include="Assets\Scripts\Network\Packet\GamePacket.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyContackDamage.cs" />
@@ -79,6 +81,7 @@
     <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
     <Compile Include="Assets\Scripts\Player\UpgradeType.cs" />
     <Compile Include="Assets\Scripts\UI\LevelUpUI.cs" />
+    <Compile Include="Assets\Scripts\Manager\DataManager.cs" />
     <Compile Include="Assets\Scripts\Network\GameServerClient.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyStats.cs" />
     <Compile Include="Assets\Scripts\Network\PacketId.cs" />
@@ -87,6 +90,7 @@
     <Compile Include="Assets\Scripts\Player\PlayerHealth.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyChase2D.cs" />
     <Compile Include="Assets\Scripts\XPOrb.cs" />
+    <Compile Include="Assets\Scripts\Network\Packet\InventoryPacket.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
